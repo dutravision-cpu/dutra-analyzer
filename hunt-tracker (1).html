@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Hunt Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, orderBy, setDoc, getDoc }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ============================================================
+  // 🔥 CONFIGURE SEU FIREBASE AQUI
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyDcUciE4nwQmhlneM6x1KsBTCAS8QlNlAw",
+    authDomain: "dutra-analyzer.firebaseapp.com",
+    projectId: "dutra-analyzer",
+    storageBucket: "dutra-analyzer.firebasestorage.app",
+    messagingSenderId: "534411440868",
+    appId: "1:534411440868:web:be01a03b9232efa76f32f1"
+  };
+  // ============================================================
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Expose to window so non-module scripts can use
+  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged, updateProfile, collection, addDoc, getDocs,
+    deleteDoc, doc, query, where, orderBy, setDoc, getDoc };
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      window.currentUser = user;
+      showApp(user);
+    } else {
+      window.currentUser = null;
+      showAuth();
+    }
+  });
+</script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C8991A;--gold-l:#F0C040;--gold-d:#7A5A0A;
+  --bg:#100A00;--bg2:#1E1200;--bg3:#2A1800;--bg4:#3D2510;
+  --border:#5A3A10;--border2:#7A5010;
+  --parch:#E8D49A;--parch2:#B8A060;--parch3:#785030;
+  --green:#3A8A3A;--green-l:#5ABD5A;
+  --red:#8B1A1A;--red-l:#E05050;
+  --r:3px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--parch);font-family:'Crimson Text',Georgia,serif;}
+
+/* ---- SCREENS ---- */
+.screen{display:none;height:100vh;overflow:hidden;}
+.screen.on{display:flex;}
+
+/* ---- AUTH ---- */
+#auth{flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 30%,#2D1500 0%,#080400 100%);}
+.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-logo .sword{font-size:52px;animation:bob 3s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.auth-logo h1{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--gold-l);
+  letter-spacing:3px;text-shadow:0 0 24px rgba(200,153,26,.6);}
+.auth-logo p{font-style:italic;color:var(--parch2);font-size:14px;margin-top:2px;}
+.auth-box{width:min(340px,92vw);background:linear-gradient(145deg,var(--bg4),var(--bg3));
+  border:1px solid var(--border);border-radius:var(--r);padding:28px;}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:22px;}
+.tab{flex:1;text-align:center;padding:8px;font-family:'Cinzel',serif;font-size:12px;
+  letter-spacing:1.5px;color:var(--parch3);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;}
+.tab.on{color:var(--gold-l);border-bottom-color:var(--gold);}
+.lbl{display:block;font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;
+  color:var(--gold-d);text-transform:uppercase;margin-bottom:5px;}
+input.fi{width:100%;background:rgba(0,0,0,.45);border:1px solid var(--border);border-radius:2px;
+  color:var(--parch);font-family:'Crimson Text',serif;font-size:16px;padding:9px 11px;
+  margin-bottom:14px;outline:none;transition:border-color .2s;}
+input.fi:focus{border-color:var(--gold);}
+input.fi::placeholder{color:var(--parch3);opacity:.7;}
+.btn-g{width:100%;background:linear-gradient(180deg,var(--gold-l),var(--gold) 55%,var(--gold-d));
+  border:1px solid var(--gold-d);border-radius:2px;color:#1A0A00;
+  font-family:'Cinzel',serif;font-weight:700;font-size:13px;letter-spacing:2px;
+  padding:11px;cursor:pointer;text-transform:uppercase;transition:.2s;margin-top:2px;}
+.btn-g:hover{filter:brightness(1.12);}
+.btn-g:active{filter:brightness(.95);}
+.btn-g:disabled{opacity:.5;cursor:not-allowed;}
+.err{color:#FF6060;font-size:13px;text-align:center;min-height:18px;margin-top:8px;}
+
+/* ---- APP ---- */
+#app{flex-direction:column;}
+.topbar{background:linear-gradient(180deg,var(--bg4),var(--bg3));border-bottom:1px solid var(--border);
+  padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-brand{font-family:'Cinzel',serif;font-size:17px;font-weight:700;color:var(--gold-l);
+  letter-spacing:2px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.user-tag{font-family:'Cinzel',serif;font-size:11px;color:var(--parch2);
+  display:none;} /* hidden on mobile */
+@media(min-width:640px){.user-tag{display:block;}}
+.btn-out{background:none;border:1px solid var(--red);color:var(--red-l);
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;
+  padding:5px 12px;border-radius:2px;cursor:pointer;text-transform:uppercase;transition:.2s;}
+.btn-out:hover{background:var(--red);color:var(--parch);}
+
+/* ---- DESKTOP NAV (sidebar) ---- */
+.app-body{display:flex;flex:1;overflow:hidden;}
+.sidebar{width:180px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);
+  padding:16px 0;display:none;flex-direction:column;gap:2px;}
+@media(min-width:640px){.sidebar{display:flex;}}
+.snav{display:flex;align-items:center;gap:10px;padding:11px 18px;
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--parch3);cursor:pointer;border-left:2px solid transparent;transition:.2s;}
+.snav:hover{color:var(--parch);background:rgba(200,153,26,.05);}
+.snav.on{color:var(--gold-l);border-left-color:var(--gold);background:rgba(200,153,26,.07);}
+.snav-icon{font-size:15px;width:18px;text-align:center;}
+
+/* ---- CONTENT ---- */
+.content-wrap{flex:1;overflow-y:auto;padding:16px;padding-bottom:80px;}
+@media(min-width:640px){.content-wrap{padding:24px;padding-bottom:24px;}}
+
+/* ---- MOBILE BOTTOM NAV ---- */
+.bottomnav{display:flex;position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg3);border-top:1px solid var(--border);z-index:50;}
+@media(min-width:640px){.bottomnav{display:none;}}
+.bnav{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:8px 4px;cursor:pointer;color:var(--parch3);transition:.2s;border-top:2px solid transparent;}
+.bnav.on{color:var(--gold-l);border-top-color:var(--gold);}
+.bnav-icon{font-size:18px;}
+.bnav-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;}
+
+/* ---- PAGES ---- */
+.page{display:none;}
+.page.on{display:block;}
+
+/* ---- SECTION HEADER ---- */
+.sh{font-family:'Cinzel',serif;font-size:17px;font-weight:600;color:var(--gold-l);
+  letter-spacing:2px;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+
+/* ---- PANEL ---- */
+.panel{background:linear-gradient(145deg,var(--bg4),var(--bg2));
+  border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px;}
+.ptitle{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gold);
+  text-transform:uppercase;margin-bottom:14px;}
+
+/* ---- STAT GRID ---- */
+.sgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+@media(min-width:480px){.sgrid{grid-template-columns:repeat(4,1fr);}}
+.scard{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:2px;
+  padding:12px 10px;text-align:center;}
+.scard-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;
+  color:var(--parch3);text-transform:uppercase;margin-bottom:6px;}
+.scard-val{font-family:'Cinzel',serif;font-size:18px;font-weight:600;}
+.scard-sub{font-size:11px;color:var(--parch3);margin-top:3px;}
+.pos{color:#5CD45C;}.neg{color:#FF5050;}.gld{color:var(--gold-l);}
+
+/* ---- PROGRESS ---- */
+.prog-row{display:flex;justify-content:space-between;margin-bottom:5px;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--parch2);}
+.prog-bg{height:10px;background:rgba(0,0,0,.5);border-radius:2px;border:1px solid var(--border);overflow:hidden;}
+.prog-fill{height:100%;border-radius:1px;transition:width .7s ease;}
+
+/* ---- FORM ---- */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+@media(min-width:480px){.fgrid{grid-template-columns:repeat(4,1fr);}}
+.fg{display:flex;flex-direction:column;}
+textarea.fi{width:100%;background:rgba(0,0,0,.45);border:1px solid var(--border);border-radius:2px;
+  color:var(--parch);font-family:'Courier New',monospace;font-size:13px;
+  padding:10px;resize:vertical;min-height:110px;outline:none;line-height:1.5;transition:border-color .2s;margin-bottom:10px;}
+textarea.fi:focus{border-color:var(--gold);}
+textarea.fi::placeholder{color:var(--parch3);opacity:.6;}
+
+/* ---- PARSE PREVIEW ---- */
+.pprev{background:rgba(0,0,0,.2);border:1px solid var(--green);border-radius:2px;
+  padding:12px;margin-bottom:12px;display:none;}
+.pprev.on{display:block;}
+.prow{display:flex;justify-content:space-between;padding:3px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);font-size:14px;}
+.prow:last-child{border-bottom:none;}
+.pkey{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--parch3);}
+
+/* ---- CALC PREVIEW ---- */
+.calc-prev{background:rgba(0,0,0,.2);border:1px solid var(--border2);border-radius:2px;
+  padding:12px;margin-bottom:12px;display:none;}
+.calc-prev.on{display:flex;gap:0;border-radius:2px;overflow:hidden;}
+.calc-item{flex:1;text-align:center;padding:8px 4px;}
+.calc-item+.calc-item{border-left:1px solid var(--border);}
+.calc-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--parch3);margin-bottom:4px;}
+.calc-val{font-family:'Cinzel',serif;font-size:15px;font-weight:600;}
+
+/* ---- BUTTON ROW ---- */
+.brow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.btn-s{background:linear-gradient(180deg,var(--gold-l),var(--gold) 55%,var(--gold-d));
+  border:1px solid var(--gold-d);border-radius:2px;color:#1A0A00;
+  font-family:'Cinzel',serif;font-weight:700;font-size:10px;letter-spacing:1.5px;
+  padding:8px 18px;cursor:pointer;text-transform:uppercase;transition:.2s;}
+.btn-s:hover{filter:brightness(1.1);}
+.btn-sec{background:none;border:1px solid var(--border);color:var(--parch2);
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;
+  padding:8px 14px;border-radius:2px;cursor:pointer;text-transform:uppercase;transition:.2s;}
+.btn-sec:hover{border-color:var(--gold-d);color:var(--gold-l);}
+.btn-del{background:none;border:none;color:var(--red);cursor:pointer;
+  font-size:15px;padding:4px 8px;border-radius:2px;transition:.2s;}
+.btn-del:hover{color:var(--red-l);background:rgba(139,26,26,.2);}
+
+/* ---- TABLE ---- */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px;}
+th{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:var(--gold-d);
+  text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:8px 10px;border-bottom:1px solid rgba(90,58,16,.25);color:var(--parch2);}
+tr:hover td{background:rgba(200,153,26,.04);}
+
+/* ---- EMPTY ---- */
+.empty{text-align:center;padding:40px 20px;color:var(--parch3);}
+.empty .ico{font-size:40px;margin-bottom:10px;opacity:.5;}
+.empty p{font-style:italic;font-size:15px;}
+
+/* ---- TOAST ---- */
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--bg4);border:1px solid var(--gold-d);color:var(--parch);
+  font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;
+  padding:12px 22px;border-radius:2px;z-index:999;opacity:0;
+  transition:all .3s;pointer-events:none;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,.8);}
+@media(min-width:640px){.toast{bottom:20px;}}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:var(--green);}
+.toast.bad{border-color:var(--red);}
+
+/* ---- SETTINGS ---- */
+.iline{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:2px;
+  color:var(--parch);font-family:'Cinzel',serif;font-size:14px;
+  padding:7px 10px;outline:none;width:160px;}
+.iline:focus{border-color:var(--gold);}
+.set-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.set-hint{font-size:13px;color:var(--parch3);font-style:italic;margin-top:8px;}
+
+/* ---- ADMIN panel ---- */
+#admin-note{background:rgba(200,153,26,.08);border:1px solid var(--gold-d);
+  border-radius:2px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--parch2);line-height:1.6;}
+#admin-note a{color:var(--gold-l);}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ===================== AUTH ===================== -->
+<div class="screen on" id="auth">
+  <div class="auth-logo">
+    <div class="sword">⚔️</div>
+    <h1>HUNT TRACKER</h1>
+    <p>Registre suas hunts. Domine o profit.</p>
+  </div>
+  <div class="auth-box">
+    <div class="tabs">
+      <div class="tab on" onclick="authTab('in')">Entrar</div>
+      <div class="tab" onclick="authTab('up')">Cadastrar</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-in">
+      <label class="lbl">E-mail</label>
+      <input class="fi" type="email" id="l-email" placeholder="seu@email.com" autocomplete="email">
+      <label class="lbl">Senha</label>
+      <input class="fi" type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
+      <button class="btn-g" onclick="doLogin()">⚡ Entrar</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-up" style="display:none">
+      <label class="lbl">Personagem / Apelido</label>
+      <input class="fi" type="text" id="r-name" placeholder="Ex: Druid Lendário" autocomplete="nickname">
+      <label class="lbl">E-mail</label>
+      <input class="fi" type="email" id="r-email" placeholder="seu@email.com" autocomplete="email">
+      <label class="lbl">Senha</label>
+      <input class="fi" type="password" id="r-pass" placeholder="mínimo 6 caracteres" autocomplete="new-password">
+      <label class="lbl">Meta Diária (gold)</label>
+      <input class="fi" type="number" id="r-meta" placeholder="500000" value="500000">
+      <button class="btn-g" onclick="doRegister()">🏰 Criar Conta</button>
+    </div>
+
+    <div class="err" id="auth-err"></div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div class="screen" id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand">⚔️ Hunt Tracker</div>
+    <div class="topbar-right">
+      <span class="user-tag" id="t-user"></span>
+      <button class="btn-out" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+
+    <!-- DESKTOP SIDEBAR -->
+    <div class="sidebar">
+      <div class="snav on" data-p="dash" onclick="nav('dash',this)"><span class="snav-icon">📊</span>Dashboard</div>
+      <div class="snav" data-p="hunt" onclick="nav('hunt',this)"><span class="snav-icon">➕</span>Nova Hunt</div>
+      <div class="snav" data-p="hist" onclick="nav('hist',this)"><span class="snav-icon">📜</span>Histórico</div>
+      <div class="snav" data-p="cfg" onclick="nav('cfg',this)"><span class="snav-icon">⚙️</span>Config</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-wrap">
+
+      <!-- DASHBOARD -->
+      <div class="page on" id="page-dash">
+        <div class="sh">📊 Dashboard</div>
+
+        <div class="panel">
+          <div class="ptitle">🌅 Hoje</div>
+          <div class="sgrid">
+            <div class="scard"><div class="scard-lbl">Loot</div><div class="scard-val gld" id="d-loot">0</div></div>
+            <div class="scard"><div class="scard-lbl">Supplies</div><div class="scard-val" id="d-sup">0</div></div>
+            <div class="scard"><div class="scard-lbl">Profit</div><div class="scard-val" id="d-prof"></div><div class="scard-sub" id="d-profh"></div></div>
+            <div class="scard"><div class="scard-lbl">Hunts</div><div class="scard-val gld" id="d-cnt">0</div></div>
+          </div>
+          <div class="prog-row"><span>META DIÁRIA</span><span id="meta-lbl"></span></div>
+          <div class="prog-bg"><div class="prog-fill" id="meta-fill" style="width:0%"></div></div>
+          <div style="text-align:right;font-size:11px;color:var(--parch3);margin-top:3px;" id="meta-pct">0%</div>
+        </div>
+
+        <div class="panel">
+          <div class="ptitle">📅 Este Mês</div>
+          <div class="sgrid">
+            <div class="scard"><div class="scard-lbl">Loot</div><div class="scard-val gld" id="m-loot">0</div></div>
+            <div class="scard"><div class="scard-lbl">Supplies</div><div class="scard-val" id="m-sup">0</div></div>
+            <div class="scard"><div class="scard-lbl">Profit</div><div class="scard-val" id="m-prof"></div></div>
+            <div class="scard"><div class="scard-lbl">Hunts</div><div class="scard-val gld" id="m-cnt">0</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ptitle">⚔️ Últimas Hunts</div>
+          <div id="d-recent"></div>
+        </div>
+      </div>
+
+      <!-- NOVA HUNT -->
+      <div class="page" id="page-hunt">
+        <div class="sh">➕ Nova Hunt</div>
+
+        <div class="panel">
+          <div class="ptitle">📋 Hunt Analyzer — Cole o texto</div>
+          <textarea class="fi" id="ha-text" placeholder="Exemplo de texto do Hunt Analyzer:
+
+Session data: From 2024-01-15, 18:00 to 19:30
+Session: 1h 30min
+Loot: 320,450
+Supplies: 87,200
+Balance: 233,250"></textarea>
+          <div class="brow">
+            <button class="btn-s" onclick="parseHA()">⚡ Parsear</button>
+            <button class="btn-sec" onclick="clearForm()">✕ Limpar</button>
+            <span id="ps-status" style="font-size:12px;color:var(--parch3);"></span>
+          </div>
+
+          <div class="pprev" id="pprev">
+            <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;color:var(--green-l);margin-bottom:8px;">✓ DETECTADO</div>
+            <div class="prow"><span class="pkey">Loot</span><span class="gld" id="p-loot"></span></div>
+            <div class="prow"><span class="pkey">Supplies</span><span id="p-sup"></span></div>
+            <div class="prow"><span class="pkey">Tempo</span><span id="p-time"></span></div>
+            <div class="prow"><span class="pkey">Profit Est.</span><span id="p-prof"></span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ptitle">✏️ Confirmar / Entrada Manual</div>
+          <div class="fgrid">
+            <div class="fg"><label class="lbl">Loot (gold)</label><input class="fi" type="number" id="i-loot" min="0" placeholder="320000" oninput="calcPrev()"></div>
+            <div class="fg"><label class="lbl">Supplies (gold)</label><input class="fi" type="number" id="i-sup" min="0" placeholder="87000" oninput="calcPrev()"></div>
+            <div class="fg"><label class="lbl">Tempo (min)</label><input class="fi" type="number" id="i-time" min="1" placeholder="90" oninput="calcPrev()"></div>
+            <div class="fg"><label class="lbl">Local</label><input class="fi" type="text" id="i-local" placeholder="Ex: Hive"></div>
+          </div>
+
+          <div class="calc-prev" id="calc-prev">
+            <div class="calc-item"><div class="calc-lbl">Profit</div><div class="calc-val" id="c-prof"></div></div>
+            <div class="calc-item"><div class="calc-lbl">Profit/h</div><div class="calc-val" id="c-profh"></div></div>
+            <div class="calc-item"><div class="calc-lbl">Eficiência</div><div class="calc-val" id="c-eff"></div></div>
+          </div>
+
+          <button class="btn-g" style="max-width:260px;" onclick="saveHunt()">⚔️ Registrar Hunt</button>
+        </div>
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div class="page" id="page-hist">
+        <div class="sh">📜 Histórico</div>
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <span style="font-size:13px;color:var(--parch3);font-style:italic;" id="h-sum"></span>
+            <button class="btn-sec" style="color:#FF8080;border-color:var(--red);" onclick="clearAll()">🗑 Limpar Tudo</button>
+          </div>
+          <div class="tbl-wrap" id="h-table"></div>
+        </div>
+      </div>
+
+      <!-- CONFIG -->
+      <div class="page" id="page-cfg">
+        <div class="sh">⚙️ Configurações</div>
+
+        <div id="admin-note">
+          🔥 <strong>Acesso Admin:</strong> Todos os cadastros e hunts ficam no <strong>Firebase Console</strong>.<br>
+          Acesse <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a>
+          → seu projeto → <strong>Firestore Database</strong> para ver todos os usuários e hunts em tempo real.<br>
+          Para autenticação: <strong>Authentication</strong> → <strong>Users</strong>.
+        </div>
+
+        <div class="panel">
+          <div class="ptitle">🎯 Meta Diária de Profit</div>
+          <div class="set-row">
+            <input class="iline" type="number" id="s-meta" min="0">
+            <button class="btn-s" onclick="saveMeta()">Salvar</button>
+          </div>
+          <div class="set-hint">Atual: <span class="gld" id="s-meta-cur"></span></div>
+        </div>
+
+        <div class="panel">
+          <div class="ptitle">🔄 Dia de Reset Mensal</div>
+          <div class="set-row">
+            <input class="iline" type="number" id="s-day" min="1" max="28" style="width:80px;">
+            <button class="btn-s" onclick="saveDay()">Salvar</button>
+          </div>
+          <div class="set-hint">Atual: <span class="gld" id="s-day-cur"></span></div>
+        </div>
+
+        <div class="panel">
+          <div class="ptitle">👤 Conta</div>
+          <div class="set-hint" style="margin-bottom:12px;">Logado como: <span class="gld" id="s-user"></span></div>
+          <button class="btn-sec" onclick="doLogout()">🚪 Sair</button>
+        </div>
+      </div>
+
+    </div><!-- /content-wrap -->
+  </div><!-- /app-body -->
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div class="bottomnav">
+    <div class="bnav on" data-p="dash" onclick="nav('dash',this)"><div class="bnav-icon">📊</div><div class="bnav-label">Dashboard</div></div>
+    <div class="bnav" data-p="hunt" onclick="nav('hunt',this)"><div class="bnav-icon">➕</div><div class="bnav-label">Hunt</div></div>
+    <div class="bnav" data-p="hist" onclick="nav('hist',this)"><div class="bnav-icon">📜</div><div class="bnav-label">Histórico</div></div>
+    <div class="bnav" data-p="cfg" onclick="nav('cfg',this)"><div class="bnav-icon">⚙️</div><div class="bnav-label">Config</div></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// UTILS
+// ============================================================
+const $ = id => document.getElementById(id);
+function fmt(n){
+  if(Math.abs(n)>=1e6) return (n/1e6).toFixed(2)+'M';
+  if(Math.abs(n)>=1e3) return (n/1e3).toFixed(1)+'k';
+  return Math.round(n).toLocaleString('pt-BR');
+}
+function today(){ return new Date().toISOString().split('T')[0]; }
+function thisMonth(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0'); }
+
+let toastTimer;
+function toast(msg,type=''){
+  const t=$('toast');
+  t.textContent=msg; t.className='toast on '+(type||'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.className='toast';},3000);
+}
+
+// ============================================================
+// USER DATA (cached from Firestore)
+// ============================================================
+let userData = { meta:500000, resetDay:1 };
+let huntsCache = [];
+
+async function loadUserData(uid){
+  const {db,doc,getDoc}=window._fb;
+  try{
+    const snap = await getDoc(doc(db,'users',uid));
+    if(snap.exists()) userData = {...userData,...snap.data()};
+  }catch(e){}
+}
+
+async function saveUserData(uid){
+  const {db,doc,setDoc}=window._fb;
+  try{ await setDoc(doc(db,'users',uid),userData,{merge:true}); }catch(e){}
+}
+
+async function loadHunts(uid){
+  const {db,collection,query,where,orderBy,getDocs}=window._fb;
+  try{
+    const q = query(collection(db,'hunts'),where('uid','==',uid),orderBy('createdAt','desc'));
+    const snap = await getDocs(q);
+    huntsCache = snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){ huntsCache=[]; }
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function authTab(t){
+  ['in','up'].forEach(x=>{
+    document.querySelector('.tab[onclick*="\''+x+'\'"]').classList.toggle('on',x===t);
+    $('form-'+x).style.display=x===t?'block':'none';
+  });
+  $('auth-err').textContent='';
+}
+
+async function doLogin(){
+  const email=$('l-email').value.trim(), pass=$('l-pass').value;
+  if(!email||!pass){$('auth-err').textContent='Preencha todos os campos.';return;}
+  try{
+    const {auth,signInWithEmailAndPassword}=window._fb;
+    await signInWithEmailAndPassword(auth,email,pass);
+  }catch(e){
+    $('auth-err').textContent = e.code==='auth/invalid-credential'?'E-mail ou senha incorretos.':
+      e.code==='auth/user-not-found'?'Usuário não encontrado.':'Erro: '+e.message;
+  }
+}
+
+async function doRegister(){
+  const name=$('r-name').value.trim(), email=$('r-email').value.trim(),
+        pass=$('r-pass').value, meta=parseInt($('r-meta').value)||500000;
+  if(!name||!email||!pass){$('auth-err').textContent='Preencha todos os campos.';return;}
+  if(pass.length<6){$('auth-err').textContent='Senha deve ter ao menos 6 caracteres.';return;}
+  try{
+    const {auth,createUserWithEmailAndPassword,updateProfile,db,doc,setDoc}=window._fb;
+    const cred = await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(cred.user,{displayName:name});
+    await setDoc(doc(db,'users',cred.user.uid),{name,meta,resetDay:1,createdAt:new Date().toISOString()});
+    userData={meta,resetDay:1};
+  }catch(e){
+    $('auth-err').textContent = e.code==='auth/email-already-in-use'?'E-mail já cadastrado.':'Erro: '+e.message;
+  }
+}
+
+async function doLogout(){
+  const {auth,signOut}=window._fb;
+  await signOut(auth);
+}
+
+// ============================================================
+// APP INIT
+// ============================================================
+async function showApp(user){
+  $('auth').classList.remove('on');
+  $('app').classList.add('on');
+  $('t-user').textContent = user.displayName||user.email;
+  $('s-user').textContent = user.displayName||user.email;
+  await loadUserData(user.uid);
+  await loadHunts(user.uid);
+  refreshDash();
+  refreshCfg();
+}
+
+function showAuth(){
+  $('app').classList.remove('on');
+  $('auth').classList.add('on');
+  huntsCache=[];
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function nav(page, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.snav,.bnav').forEach(n=>n.classList.remove('on'));
+  $('page-'+page).classList.add('on');
+  document.querySelectorAll('[data-p="'+page+'"]').forEach(n=>n.classList.add('on'));
+  if(page==='dash') refreshDash();
+  if(page==='hist') refreshHist();
+  if(page==='cfg') refreshCfg();
+  // scroll top
+  document.querySelector('.content-wrap').scrollTop=0;
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function refreshDash(){
+  const td=today(), mo=thisMonth();
+  const th=huntsCache.filter(h=>h.date===td);
+  const mh=huntsCache.filter(h=>(h.date||'').startsWith(mo));
+
+  function sum(arr){
+    let l=0,s=0,t=0;
+    arr.forEach(h=>{l+=h.loot||0;s+=h.sup||0;t+=h.time||0;});
+    const p=l-s, ph=t>0?Math.round(p/(t/60)):0;
+    return{l,s,p,t,ph,n:arr.length};
+  }
+  const T=sum(th), M=sum(mh);
+
+  $('d-loot').textContent=fmt(T.l);
+  $('d-sup').textContent=fmt(T.s);
+  $('d-prof').textContent=(T.p>=0?'+':'')+fmt(T.p);
+  $('d-prof').className='scard-val '+(T.p>=0?'pos':'neg');
+  $('d-profh').textContent=fmt(T.ph)+'/h';
+  $('d-cnt').textContent=T.n;
+
+  const meta=userData.meta||500000;
+  const pct=Math.min(Math.max(0,Math.round((T.p/meta)*100)),100);
+  const barColor=pct>=100?'linear-gradient(90deg,#C8991A,#F0C040)':pct>=50?'linear-gradient(90deg,#3A8A3A,#5ABD5A)':'linear-gradient(90deg,#8B1A1A,#C04040)';
+  $('meta-fill').style.cssText='width:'+pct+'%;background:'+barColor;
+  $('meta-lbl').textContent=fmt(Math.max(0,T.p))+' / '+fmt(meta);
+  $('meta-pct').textContent=pct+'%';
+
+  $('m-loot').textContent=fmt(M.l);
+  $('m-sup').textContent=fmt(M.s);
+  $('m-prof').textContent=(M.p>=0?'+':'')+fmt(M.p);
+  $('m-prof').className='scard-val '+(M.p>=0?'pos':'neg');
+  $('m-cnt').textContent=M.n;
+
+  const recent=huntsCache.slice(0,5);
+  if(!recent.length){
+    $('d-recent').innerHTML='<div class="empty"><div class="ico">🗡️</div><p>Nenhuma hunt ainda. Vá caçar!</p></div>';
+  } else {
+    $('d-recent').innerHTML='<div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Local</th><th>Profit</th><th>Tempo</th></tr></thead><tbody>'+
+      recent.map(h=>{const p=h.loot-h.sup;return`<tr>
+        <td>${h.date||'—'}</td>
+        <td style="color:var(--parch)">${h.local||'—'}</td>
+        <td class="${p>=0?'pos':'neg'}">${p>=0?'+':''}${fmt(p)}</td>
+        <td>${h.time}min</td></tr>`;}).join('')+'</tbody></table></div>';
+  }
+}
+
+// ============================================================
+// PARSER
+// ============================================================
+function parseHA(){
+  const text=$('ha-text').value;
+  if(!text.trim()){toast('Cole o texto do Hunt Analyzer!','bad');return;}
+
+  const pn=s=>s?parseInt(s.replace(/[,.\s]/g,'').replace(/\D/g,''))||0:0;
+  const loot=pn((text.match(/Loot:\s*([0-9,.\s]+)/i)||[])[1]);
+  const sup =pn((text.match(/Supplies:\s*([0-9,.\s]+)/i)||[])[1]);
+
+  let tm=0;
+  const mFull=text.match(/(\d+)h\s+(\d+)min/i);
+  const mH=text.match(/(\d+)h(?!\s*\d)/i);
+  const mM=text.match(/(\d+)\s*min/i);
+  if(mFull) tm=parseInt(mFull[1])*60+parseInt(mFull[2]);
+  else if(mH) tm=parseInt(mH[1])*60;
+  else if(mM) tm=parseInt(mM[1]);
+
+  if(loot>0) $('i-loot').value=loot;
+  if(sup>0)  $('i-sup').value=sup;
+  if(tm>0)   $('i-time').value=tm;
+
+  const p=loot-sup;
+  $('pprev').classList.add('on');
+  $('p-loot').textContent=fmt(loot)+' gp';
+  $('p-sup').textContent=fmt(sup)+' gp';
+  $('p-time').textContent=tm+'min';
+  $('p-prof').textContent=(p>=0?'+':'')+fmt(p)+' gp';
+  $('p-prof').className=p>=0?'pos':'neg';
+  $('ps-status').textContent='✓ Parseado';
+  calcPrev();
+  toast('✓ Hunt Analyzer parseado!','ok');
+}
+
+function calcPrev(){
+  const l=parseInt($('i-loot').value)||0;
+  const s=parseInt($('i-sup').value)||0;
+  const t=parseInt($('i-time').value)||0;
+  if(!l&&!s){$('calc-prev').classList.remove('on');return;}
+  const p=l-s, ph=t>0?Math.round(p/(t/60)):0, eff=l>0?Math.round((p/l)*100):0;
+  $('calc-prev').classList.add('on');
+  $('c-prof').textContent=(p>=0?'+':'')+fmt(p);
+  $('c-prof').className='calc-val '+(p>=0?'pos':'neg');
+  $('c-profh').textContent=(ph>=0?'+':'')+fmt(ph)+'/h';
+  $('c-profh').className='calc-val '+(ph>=0?'pos':'neg');
+  $('c-eff').textContent=eff+'%';
+  $('c-eff').className='calc-val '+(eff>=30?'pos':'neg');
+}
+
+function clearForm(){
+  $('ha-text').value='';
+  $('pprev').classList.remove('on');
+  $('calc-prev').classList.remove('on');
+  $('ps-status').textContent='';
+  ['i-loot','i-sup','i-time','i-local'].forEach(id=>{$(id).value='';});
+}
+
+// ============================================================
+// SAVE HUNT
+// ============================================================
+async function saveHunt(){
+  const user=window.currentUser;
+  if(!user) return;
+  const loot=parseInt($('i-loot').value)||0;
+  const sup =parseInt($('i-sup').value)||0;
+  const time=parseInt($('i-time').value)||0;
+  const local=$('i-local').value.trim();
+
+  if(!loot&&!sup){toast('Informe Loot ou Supplies!','bad');return;}
+  if(!time){toast('Informe o tempo da hunt!','bad');return;}
+
+  const btn=document.querySelector('#page-hunt .btn-g');
+  btn.disabled=true; btn.textContent='Salvando...';
+
+  const {db,collection,addDoc}=window._fb;
+  try{
+    const doc=await addDoc(collection(db,'hunts'),{
+      uid:user.uid, loot, sup, time, local, date:today(),
+      createdAt: new Date().toISOString()
+    });
+    huntsCache.unshift({id:doc.id,uid:user.uid,loot,sup,time,local,date:today(),createdAt:new Date().toISOString()});
+    toast('⚔️ Hunt salva! Profit: '+(loot-sup>=0?'+':'')+fmt(loot-sup),'ok');
+    clearForm();
+    refreshDash();
+  }catch(e){ toast('Erro ao salvar: '+e.message,'bad'); }
+
+  btn.disabled=false; btn.textContent='⚔️ Registrar Hunt';
+}
+
+// ============================================================
+// HISTORY
+// ============================================================
+function refreshHist(){
+  const h=huntsCache;
+  if(!h.length){
+    $('h-table').innerHTML='<div class="empty"><div class="ico">📜</div><p>Nenhuma hunt registrada.</p></div>';
+    $('h-sum').textContent='';
+    return;
+  }
+  let tl=0,ts=0,tt=0;
+  h.forEach(x=>{tl+=x.loot||0;ts+=x.sup||0;tt+=x.time||0;});
+  $('h-sum').textContent=h.length+' hunts · '+fmt(tl-ts)+' gold total · '+Math.round(tt/60)+'h';
+
+  $('h-table').innerHTML='<table><thead><tr><th>Data</th><th>Local</th><th>Loot</th><th>Sup</th><th>Profit</th><th>Min</th><th>P/h</th><th></th></tr></thead><tbody>'+
+    h.map(x=>{
+      const p=x.loot-x.sup, ph=x.time>0?Math.round(p/(x.time/60)):0;
+      return`<tr>
+        <td>${x.date||'—'}</td>
+        <td style="color:var(--parch)">${x.local||'—'}</td>
+        <td class="gld">${fmt(x.loot)}</td>
+        <td>${fmt(x.sup)}</td>
+        <td class="${p>=0?'pos':'neg'}">${p>=0?'+':''}${fmt(p)}</td>
+        <td>${x.time}</td>
+        <td class="${ph>=0?'pos':'neg'}">${ph>=0?'+':''}${fmt(ph)}</td>
+        <td><button class="btn-del" onclick="delHunt('${x.id}')">✕</button></td>
+      </tr>`;
+    }).join('')+'</tbody></table>';
+}
+
+async function delHunt(id){
+  const user=window.currentUser; if(!user) return;
+  const {db,doc,deleteDoc}=window._fb;
+  try{
+    await deleteDoc(doc(db,'hunts',id));
+    huntsCache=huntsCache.filter(h=>h.id!==id);
+    refreshHist(); refreshDash();
+    toast('Hunt removida.','');
+  }catch(e){ toast('Erro: '+e.message,'bad'); }
+}
+
+async function clearAll(){
+  if(!confirm('Apagar TODAS as hunts? Não tem volta.')) return;
+  const user=window.currentUser; if(!user) return;
+  const {db,doc,deleteDoc}=window._fb;
+  try{
+    await Promise.all(huntsCache.map(h=>deleteDoc(doc(db,'hunts',h.id))));
+    huntsCache=[];
+    refreshHist(); refreshDash();
+    toast('Histórico limpo.','');
+  }catch(e){ toast('Erro: '+e.message,'bad'); }
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function refreshCfg(){
+  $('s-meta').value=userData.meta||500000;
+  $('s-meta-cur').textContent=fmt(userData.meta||500000)+' gold/dia';
+  $('s-day').value=userData.resetDay||1;
+  $('s-day-cur').textContent='Dia '+(userData.resetDay||1)+' de cada mês';
+  $('s-user').textContent=window.currentUser?.displayName||window.currentUser?.email||'—';
+}
+
+async function saveMeta(){
+  const user=window.currentUser; if(!user) return;
+  userData.meta=parseInt($('s-meta').value)||500000;
+  await saveUserData(user.uid);
+  refreshCfg(); refreshDash();
+  toast('Meta salva: '+fmt(userData.meta)+' gold','ok');
+}
+
+async function saveDay(){
+  const user=window.currentUser; if(!user) return;
+  userData.resetDay=Math.min(28,Math.max(1,parseInt($('s-day').value)||1));
+  await saveUserData(user.uid);
+  refreshCfg();
+  toast('Dia de reset salvo: dia '+userData.resetDay,'ok');
+}
+</script>
+</body>
+</html>
