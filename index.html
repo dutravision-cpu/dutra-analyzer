@@ -86,98 +86,255 @@ body::before {
 .screen { display: none; height: 100vh; position: relative; z-index: 1; }
 .screen.on { display: flex; }
 
-/* ===== AUTH ===== */
+/* ===== AUTH — TIBIA STONE FRAME ===== */
 #auth {
   flex-direction: column; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at 50% 20%, #251500 0%, #080400 70%);
-  overflow-y: auto;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 35%, #1c0e00 0%, #080400 100%);
+  overflow-y: auto; position: relative;
 }
+
+/* Dungeon floor texture */
 #auth::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 48px, rgba(200,153,26,0.018) 48px, rgba(200,153,26,0.018) 49px),
+    repeating-linear-gradient(90deg, transparent, transparent 48px, rgba(200,153,26,0.018) 48px, rgba(200,153,26,0.018) 49px);
+}
+
+/* Vignette */
+#auth::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(0,0,0,0.65) 100%);
+}
+
+/* ── FRAME WRAPPER ── */
+.auth-frame {
+  position: relative;
+  width: min(400px, 96vw);
+  z-index: 2;
+  animation: auth-appear 0.5s cubic-bezier(0.34,1.2,0.64,1) both;
+}
+@keyframes auth-appear {
+  from { opacity:0; transform: translateY(20px) scale(0.96); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+
+/* ── RED BANNER (topo) ── */
+.auth-banner {
+  position: relative;
+  text-align: center;
+  margin-bottom: -2px;
+  z-index: 10;
+  pointer-events: none;
+}
+.auth-banner-inner {
+  display: inline-block;
+  position: relative;
+  padding: 0 60px;
+}
+
+/* SVG ribbon via CSS — corpo central */
+.auth-banner-ribbon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 260px;
+  height: 54px;
+  background: linear-gradient(180deg, #c0302a 0%, #8b1a15 55%, #6b1010 100%);
+  clip-path: polygon(
+    8px 0%, calc(100% - 8px) 0%,
+    100% 50%,
+    calc(100% - 8px) 100%,
+    8px 100%,
+    0% 50%
+  );
+  box-shadow:
+    0 4px 20px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -2px 0 rgba(0,0,0,0.3);
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
+}
+.auth-banner-ribbon::before {
   content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(200,153,26,0.015) 40px, rgba(200,153,26,0.015) 41px),
-              repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(200,153,26,0.015) 40px, rgba(200,153,26,0.015) 41px);
+  position: absolute; inset: 3px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 60%);
+  clip-path: inherit;
   pointer-events: none;
 }
 
-.auth-logo { text-align: center; margin-bottom: 32px; position: relative; }
-.auth-sword {
-  font-size: 64px; display: block; margin-bottom: 12px;
-  filter: drop-shadow(0 0 30px rgba(200,153,26,0.8));
-  animation: float 3s ease-in-out infinite;
-}
-@keyframes float { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-10px) rotate(5deg)} }
-
-.auth-title {
-  font-family: 'Cinzel', serif; font-size: 32px; font-weight: 900;
-  color: var(--gold-l); letter-spacing: 6px;
-  text-shadow: 0 0 40px var(--gold), 0 0 80px rgba(200,153,26,0.3), 0 2px 4px #000;
-  margin-bottom: 4px;
-}
-.auth-sub { font-family: 'Crimson Text', serif; font-style: italic; color: var(--parch3); font-size: 15px; letter-spacing: 2px; }
-
-.auth-divider {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
-  color: var(--border3); font-size: 18px;
-}
-.auth-divider::before, .auth-divider::after {
-  content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border2), transparent);
+/* Scroll tails left & right */
+.auth-banner-ribbon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.06) 0%, transparent 30%),
+    linear-gradient(-90deg, rgba(255,255,255,0.06) 0%, transparent 30%);
+  pointer-events: none;
 }
 
+/* Curled ends */
+.auth-banner-curl-l,
+.auth-banner-curl-r {
+  position: absolute;
+  bottom: -10px;
+  width: 32px; height: 22px;
+  background: linear-gradient(160deg, #7a1810, #4a0e0c);
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.4);
+}
+.auth-banner-curl-l {
+  left: -18px;
+  clip-path: polygon(0 0, 100% 0, 100% 65%, 50% 100%, 0 65%);
+}
+.auth-banner-curl-r {
+  right: -18px;
+  clip-path: polygon(0 0, 100% 0, 100% 65%, 50% 100%, 0 65%);
+}
+
+.auth-banner-title {
+  position: relative; z-index: 2;
+  font-family: 'Cinzel', serif; font-weight: 900;
+  font-size: 20px; letter-spacing: 5px;
+  color: #f5d060;
+  text-shadow:
+    0 1px 0 rgba(0,0,0,0.9),
+    0 0 12px rgba(245,208,96,0.5),
+    0 0 30px rgba(200,153,26,0.3);
+  text-transform: uppercase;
+}
+
+/* ── STONE FRAME BOX ── */
 .auth-box {
-  width: min(360px, 94vw);
-  background: linear-gradient(160deg, var(--bg5) 0%, var(--bg3) 100%);
-  border: 1px solid var(--border2);
-  border-radius: var(--r);
-  padding: 32px 28px;
   position: relative;
-  box-shadow: var(--shadow), inset 0 1px 0 rgba(200,153,26,0.15);
-}
-.auth-box::before, .auth-box::after {
-  content: ''; position: absolute;
-  width: 20px; height: 20px;
-  border-color: var(--gold-d); border-style: solid;
-}
-.auth-box::before { top: 6px; left: 6px; border-width: 1px 0 0 1px; }
-.auth-box::after { bottom: 6px; right: 6px; border-width: 0 1px 1px 0; }
+  width: 100%;
+  background:
+    linear-gradient(160deg, #1e1a16 0%, #141210 50%, #0e0c0a 100%);
+  border: none;
+  border-radius: 2px;
+  padding: 36px 32px 28px;
 
-.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  /* Stone texture via layered box-shadows */
+  box-shadow:
+    /* outer stone border */
+    0 0 0 3px #2a2420,
+    0 0 0 5px #1a1612,
+    0 0 0 7px #3a3028,
+    0 0 0 9px #1a1612,
+    /* outer glow */
+    0 8px 40px rgba(0,0,0,0.9),
+    0 0 60px rgba(0,0,0,0.6),
+    /* inner top light */
+    inset 0 1px 0 rgba(200,153,26,0.08),
+    inset 0 0 30px rgba(0,0,0,0.4);
+}
+
+/* Stone crack texture overlay */
+.auth-box::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: 2px;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 20 L15 35 L8 50 M60 5 L65 18 L58 30 L70 45 M80 60 L75 75 L85 88' stroke='rgba(0,0,0,0.15)' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
+  pointer-events: none; opacity: 0.6;
+}
+
+/* ── GOLD CORNER ORNAMENTS ── */
+.auth-box-corners {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+}
+.corner {
+  position: absolute;
+  width: 36px; height: 36px;
+}
+.corner svg { width: 100%; height: 100%; }
+.corner-tl { top: -4px; left: -4px; }
+.corner-tr { top: -4px; right: -4px; transform: scaleX(-1); }
+.corner-bl { bottom: -4px; left: -4px; transform: scaleY(-1); }
+.corner-br { bottom: -4px; right: -4px; transform: scale(-1); }
+
+/* ── TABS — stone style ── */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(200,153,26,0.2);
+  margin-bottom: 26px;
+  gap: 4px;
+}
 .tab {
-  flex: 1; text-align: center; padding: 10px;
-  font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 2px;
-  color: var(--parch3); cursor: pointer; text-transform: uppercase;
-  border-bottom: 2px solid transparent; transition: all .25s;
+  flex: 1; text-align: center; padding: 10px 8px;
+  font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2.5px;
+  color: #6a5030; cursor: pointer; text-transform: uppercase;
+  border-bottom: 2px solid transparent; transition: all .22s;
+  position: relative;
 }
-.tab.on { color: var(--gold-l); border-bottom-color: var(--gold); text-shadow: 0 0 10px var(--gold-glow); }
+.tab:hover { color: #c4a060; }
+.tab.on {
+  color: #f5d060;
+  border-bottom-color: #c8991a;
+  text-shadow: 0 0 12px rgba(200,153,26,0.5);
+}
 
+/* ── LABELS ── */
 .lbl {
-  display: block; font-family: 'Cinzel', serif; font-size: 10px;
-  letter-spacing: 2px; color: var(--gold-d); text-transform: uppercase; margin-bottom: 6px;
+  display: block; font-family: 'Cinzel', serif; font-size: 9px;
+  letter-spacing: 2.5px; color: #8a6828; text-transform: uppercase; margin-bottom: 7px;
 }
-input.fi {
-  width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
-  border-radius: var(--r); color: var(--parch); font-family: 'Crimson Text', serif;
-  font-size: 17px; padding: 10px 13px; margin-bottom: 16px; outline: none;
-  transition: all .2s;
-}
-input.fi:focus { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow); }
-input.fi::placeholder { color: var(--parch4); }
 
+/* ── INPUTS — dark stone ── */
+input.fi {
+  width: 100%;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid #3a2c1a;
+  border-radius: 2px;
+  color: #e8d9a0;
+  font-family: 'Crimson Text', serif;
+  font-size: 16px; padding: 11px 14px; margin-bottom: 18px;
+  outline: none; transition: all .22s;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(0,0,0,0.3);
+}
+input.fi:focus {
+  border-color: #8a6020;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 0 2px rgba(200,153,26,0.2), 0 0 10px rgba(200,153,26,0.15);
+  background: rgba(0,0,0,0.7);
+}
+input.fi::placeholder { color: #4a3820; }
+
+/* ── MAIN BUTTON — red stone ── */
 .btn-gold {
   width: 100%;
-  background: linear-gradient(180deg, #F5D060 0%, #C8991A 45%, #8B6510 100%);
-  border: 1px solid #6A4808; border-radius: var(--r); color: #1A0A00;
-  font-family: 'Cinzel', serif; font-weight: 700; font-size: 13px;
-  letter-spacing: 3px; padding: 13px; cursor: pointer; text-transform: uppercase;
-  transition: all .2s; margin-top: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+  background: linear-gradient(180deg, #c0302a 0%, #8b1a15 50%, #6b1010 100%);
+  border: 1px solid #4a0e0c;
+  border-radius: 2px;
+  color: #f5d060;
+  font-family: 'Cinzel', serif; font-weight: 700; font-size: 12px;
+  letter-spacing: 3.5px; padding: 14px; cursor: pointer; text-transform: uppercase;
+  transition: all .22s; margin-top: 4px;
+  box-shadow:
+    0 3px 12px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset 0 -2px 0 rgba(0,0,0,0.3);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8), 0 0 12px rgba(245,208,96,0.3);
 }
-.btn-gold:hover { filter: brightness(1.15); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200,153,26,0.4); }
-.btn-gold:active { transform: translateY(0); filter: brightness(0.95); }
-.btn-gold:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-gold:hover {
+  background: linear-gradient(180deg, #d03530 0%, #9b2018 50%, #7b1212 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.8), 0 0 20px rgba(139,26,21,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-gold:active { transform: translateY(0); filter: brightness(0.9); }
+.btn-gold:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-.auth-err { color: var(--red-l); font-size: 13px; text-align: center; min-height: 20px; margin-top: 10px; }
+.auth-err {
+  color: #dd4040; font-size: 13px; text-align: center;
+  min-height: 20px; margin-top: 12px;
+  font-family: 'Crimson Text', serif; font-style: italic;
+}
+
+/* ── AUTH FOOTER SUB ── */
+.auth-sub-line {
+  text-align: center; margin-top: 16px;
+  font-family: 'Crimson Text', serif; font-style: italic;
+  font-size: 13px; color: #5a4020; letter-spacing: 1px;
+}
 
 /* ===== APP ===== */
 #app { flex-direction: column; overflow: hidden; }
@@ -587,134 +744,496 @@ tr:hover td { background: rgba(200,153,26,0.04); }
 .celeb-title { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900; color: var(--gold-l); letter-spacing: 3px; margin-bottom: 6px; }
 .celeb-sub { font-family: 'Crimson Text', serif; font-style: italic; color: var(--parch2); font-size: 16px; }
 
+/* ===== PAYWALL ===== */
+.pw-plan {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(201,164,76,0.15);
+  border-radius: 14px;
+  padding: 18px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.pw-plan:hover { border-color: rgba(201,164,76,0.4); transform: translateY(-2px); }
+.pw-plan.selected { border-color: #c9a44c !important; background: rgba(201,164,76,0.08) !important; }
+.pw-plan-dest {
+  border-color: rgba(201,164,76,0.3) !important;
+  background: rgba(201,164,76,0.04) !important;
+}
+.pw-plan-badge {
+  position: absolute; top: 0; right: 0;
+  background: linear-gradient(135deg,#c9a44c,#a8832f);
+  color: #111; font-family: 'Cinzel',serif; font-size: 7px;
+  font-weight: 700; letter-spacing: 1px; padding: 3px 8px;
+  border-radius: 0 14px 0 8px;
+}
+.pw-plan-name { font-family: 'Cinzel',serif; font-size: 11px; letter-spacing: 2px; color: #9a9a9a; margin-bottom: 8px; text-transform: uppercase; }
+.pw-plan-price { font-family: 'Cinzel',serif; font-size: 26px; font-weight: 900; color: #e8c96a; line-height: 1; margin-bottom: 4px; }
+.pw-plan-period { font-size: 11px; color: #6a6a6a; margin-bottom: 10px; }
+.pw-plan-desc { font-size: 11px; color: #9a9a9a; }
+
 /* =============================
-   OVERRIDE MODERNO
+   PREMIUM REDESIGN v2 — DUTRA ANALYZER
 ============================= */
 :root {
-  --gold: #c9a44c;
-  --gold-soft: rgba(201,164,76,0.6);
-  --bg-main: #0f0f10;
-  --bg-card: rgba(255,255,255,0.02);
-  --border-soft: rgba(201,164,76,0.15);
-  --text-main: #eaeaea;
-  --text-soft: #9a9a9a;
+  --gold: #c9a44c !important;
+  --gold-l: #e8c96a !important;
+  --gold-d: #a8832f !important;
+  --gold-glow: rgba(201,164,76,0.35) !important;
+  --bg: #080809 !important;
+  --bg2: #0e0e10 !important;
+  --bg3: #111113 !important;
+  --bg4: #151517 !important;
+  --bg5: #1a1a1d !important;
+  --border: rgba(201,164,76,0.10) !important;
+  --border2: rgba(201,164,76,0.18) !important;
+  --border3: rgba(201,164,76,0.30) !important;
+  --parch: #e8e8e8 !important;
+  --parch2: #c9a44c !important;
+  --parch3: #888 !important;
+  --parch4: #444 !important;
+  --r: 12px !important;
+  --border-soft: rgba(201,164,76,0.14);
+  --bg-card: rgba(255,255,255,0.022);
+  --green-profit: #3dd68c;
+  --red-loss: #ff5c5c;
+  --card-shadow: 0 2px 24px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,164,76,0.08);
+  --card-shadow-hover: 0 8px 40px rgba(0,0,0,0.7), 0 0 20px rgba(201,164,76,0.10), 0 0 0 1px rgba(201,164,76,0.22);
 }
 
-body {
-  background: radial-gradient(circle at 20% 20%, #1a1a1a, #0b0b0c);
-  color: var(--text-main);
+html, body {
+  background: #080809 !important;
+  color: #e8e8e8 !important;
 }
 
-.sidebar {
-  background: rgba(255,255,255,0.01);
-  border-right: 1px solid var(--border-soft);
-  backdrop-filter: blur(6px);
+/* Particle/dust atmosphere */
+body::before {
+  content: '' !important;
+  position: fixed !important; inset: 0 !important; z-index: 0 !important; pointer-events: none !important;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 15% 10%, rgba(201,164,76,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 80%, rgba(201,164,76,0.03) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E") !important;
+  display: block !important;
 }
 
-.panel,
+/* ---- AUTH — preserve stone frame ---- */
+#auth {
+  background: radial-gradient(ellipse 70% 50% at 50% 35%, #1c0e00 0%, #080400 100%) !important;
+}
+#auth::before { display: block !important; }
+
 .auth-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
-  backdrop-filter: blur(8px);
-  transition: border-color 0.25s ease, transform 0.25s ease;
+  background: linear-gradient(160deg, #1e1a16 0%, #141210 50%, #0e0c0a 100%) !important;
+  border: none !important;
+  border-radius: 2px !important;
+  box-shadow:
+    0 0 0 3px #2a2420,
+    0 0 0 5px #1a1612,
+    0 0 0 7px #3a3028,
+    0 0 0 9px #1a1612,
+    0 8px 40px rgba(0,0,0,0.9),
+    inset 0 1px 0 rgba(200,153,26,0.08),
+    inset 0 0 30px rgba(0,0,0,0.4) !important;
+  backdrop-filter: none !important;
 }
-.panel:hover {
-  border-color: rgba(201,164,76,0.35);
-  transform: translateY(-2px);
+.auth-box::before, .auth-box::after { display: none !important; }
+
+/* inputs inside auth — stone dark style */
+#auth input.fi {
+  background: rgba(0,0,0,0.6) !important;
+  border: 1px solid #3a2c1a !important;
+  border-radius: 2px !important;
+  color: #e8d9a0 !important;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6) !important;
+}
+#auth input.fi:focus {
+  border-color: #8a6020 !important;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 0 2px rgba(200,153,26,0.2) !important;
 }
 
+/* main btn inside auth — red stone */
+#auth .btn-gold {
+  background: linear-gradient(180deg, #c0302a 0%, #8b1a15 50%, #6b1010 100%) !important;
+  border: 1px solid #4a0e0c !important;
+  border-radius: 2px !important;
+  color: #f5d060 !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8) !important;
+}
+#auth .btn-gold:hover {
+  background: linear-gradient(180deg, #d03530 0%, #9b2018 50%, #7b1212 100%) !important;
+  filter: none !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.8), 0 0 20px rgba(139,26,21,0.35) !important;
+}
+
+.auth-divider { display: none !important; }
+
+/* ---- TOPBAR ---- */
+.topbar {
+  background: rgba(8,8,9,0.85) !important;
+  border-bottom: 1px solid rgba(201,164,76,0.14) !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 1px 0 rgba(201,164,76,0.06) !important;
+  min-height: 58px !important;
+}
+.topbar::after { display: none !important; }
+.topbar-brand {
+  font-size: 16px !important;
+  letter-spacing: 4px !important;
+  text-shadow: 0 0 16px rgba(201,164,76,0.4) !important;
+}
+
+/* ---- SIDEBAR — RPG style ---- */
+.sidebar {
+  background: rgba(8,8,9,0.7) !important;
+  border-right: 1px solid rgba(201,164,76,0.10) !important;
+  backdrop-filter: blur(12px) !important;
+  width: 200px !important;
+}
+.sidebar::after { display: none !important; }
+
+/* RPG icon container */
+.snav {
+  border-left: 3px solid transparent !important;
+  border-radius: 0 8px 8px 0 !important;
+  margin: 2px 8px 2px 0 !important;
+  padding: 12px 14px !important;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1) !important;
+  position: relative !important;
+}
+.snav:hover {
+  background: rgba(201,164,76,0.07) !important;
+  color: #e8c96a !important;
+}
+.snav:hover .snav-icon { filter: drop-shadow(0 0 6px rgba(201,164,76,0.6)); }
+.snav.on {
+  background: linear-gradient(90deg, rgba(201,164,76,0.12) 0%, rgba(201,164,76,0.03) 100%) !important;
+  border-left-color: #c9a44c !important;
+  color: #e8c96a !important;
+  text-shadow: 0 0 12px rgba(201,164,76,0.3) !important;
+  box-shadow: inset 0 0 20px rgba(201,164,76,0.05) !important;
+}
+.snav.on .snav-icon { filter: drop-shadow(0 0 8px rgba(201,164,76,0.8)); }
+.snav-icon { font-size: 18px !important; transition: filter 0.2s; }
+
+/* ---- CONTENT ---- */
+.content-wrap { background: transparent !important; }
+
+/* ---- SECTION HEADERS ---- */
 .sh {
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  font-weight: 600 !important;
+  letter-spacing: 2px !important;
+  font-size: 18px !important;
+  padding-bottom: 16px !important;
+  text-shadow: 0 0 20px rgba(201,164,76,0.25) !important;
 }
+.sh::after {
+  background: linear-gradient(90deg, rgba(201,164,76,0.35), rgba(201,164,76,0.08), transparent) !important;
+  height: 1px !important;
+}
+
+/* ---- PANELS ---- */
+.panel {
+  background: linear-gradient(145deg, rgba(255,255,255,0.030) 0%, rgba(255,255,255,0.012) 100%) !important;
+  border: 1px solid rgba(201,164,76,0.14) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: var(--card-shadow) !important;
+  margin-bottom: 20px !important;
+  transition: border-color 0.28s ease, transform 0.28s ease, box-shadow 0.28s ease !important;
+}
+.panel::before, .panel::after { display: none !important; }
+.panel:hover {
+  border-color: rgba(201,164,76,0.28) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: var(--card-shadow-hover) !important;
+}
+
 .ptitle {
-  color: var(--gold);
-  font-size: 14px;
-  opacity: 0.9;
+  color: #c9a44c !important;
+  font-size: 10px !important;
+  letter-spacing: 3px !important;
+  opacity: 1 !important;
+  margin-bottom: 18px !important;
+}
+.ptitle::before { display: none !important; }
+
+/* ---- STAT CARDS — HIERARCHY ---- */
+/* Profit card gets special treatment via JS class .scard-hero */
+.scard {
+  background: linear-gradient(145deg, rgba(255,255,255,0.040) 0%, rgba(255,255,255,0.018) 100%) !important;
+  border: 1px solid rgba(201,164,76,0.12) !important;
+  border-radius: 12px !important;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4) !important;
+}
+.scard::before { display: none !important; }
+.scard:hover {
+  background: linear-gradient(145deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.025) 100%) !important;
+  border-color: rgba(201,164,76,0.28) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5), 0 0 14px rgba(201,164,76,0.08) !important;
+}
+.scard-val { font-size: 22px !important; }
+
+/* Hero profit card */
+.scard-hero {
+  background: linear-gradient(145deg, rgba(201,164,76,0.10) 0%, rgba(201,164,76,0.04) 100%) !important;
+  border: 1px solid rgba(201,164,76,0.30) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 0 24px rgba(201,164,76,0.12), 0 2px 16px rgba(0,0,0,0.5) !important;
+  grid-column: span 2 !important;
+  padding: 20px 14px !important;
+}
+@media(min-width:480px) {
+  .scard-hero { grid-column: span 2 !important; }
+}
+.scard-hero .scard-val { font-size: 32px !important; }
+.scard-hero .scard-lbl { font-size: 10px !important; letter-spacing: 3px !important; color: #c9a44c !important; }
+.scard-hero:hover {
+  border-color: rgba(201,164,76,0.50) !important;
+  box-shadow: 0 0 40px rgba(201,164,76,0.20), 0 8px 32px rgba(0,0,0,0.6) !important;
+  transform: translateY(-3px) !important;
 }
 
-.scard-sub,
-.set-hint,
-.auth-sub {
-  color: var(--text-soft);
+/* ---- META PROGRESS BAR — animated & dynamic color ---- */
+.meta-bar-bg {
+  height: 18px !important;
+  background: rgba(0,0,0,0.45) !important;
+  border: 1px solid rgba(201,164,76,0.12) !important;
+  border-radius: 9px !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+.meta-bar-fill {
+  border-radius: 8px !important;
+  transition: width 0.9s cubic-bezier(0.34,1.56,0.64,1), background 0.6s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+/* Shimmer effect on bar */
+.meta-bar-fill::after {
+  content: '' !important;
+  position: absolute !important; top: 0 !important; left: -100% !important;
+  width: 50% !important; height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent) !important;
+  animation: shimmer-bar 2.2s ease-in-out infinite !important;
+  display: block !important;
+}
+@keyframes shimmer-bar { 0%{left:-60%} 100%{left:160%} }
+.meta-bar-stripe { display: none !important; }
+.meta-pct { font-size: 11px !important; margin-top: 6px !important; }
+
+/* ---- INPUTS ---- */
+input.fi, textarea.fi, .fi-sm, .iline {
+  background: rgba(255,255,255,0.040) !important;
+  border: 1px solid rgba(201,164,76,0.16) !important;
+  border-radius: 10px !important;
+  color: #e8e8e8 !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+input.fi:focus, textarea.fi:focus, .fi-sm:focus, .iline:focus {
+  border-color: #c9a44c !important;
+  box-shadow: 0 0 0 3px rgba(201,164,76,0.14) !important;
 }
 
-input.fi,
-textarea.fi,
-.fi-sm,
-.iline {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border-soft);
-  border-radius: 8px;
-  color: var(--text-main);
-  transition: border-color 0.2s;
+/* ---- BUTTONS ---- */
+.btn-gold {
+  background: linear-gradient(135deg, #d4b055 0%, #c9a44c 40%, #a8832f 100%) !important;
+  color: #0e0a00 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 12px rgba(201,164,76,0.25) !important;
+  transition: filter 0.2s, transform 0.2s, box-shadow 0.2s !important;
 }
-input.fi:focus,
-textarea.fi:focus,
-.fi-sm:focus,
-.iline:focus {
-  border-color: var(--gold);
-  outline: none;
-  box-shadow: none;
+.btn-gold:hover {
+  filter: brightness(1.12) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 20px rgba(201,164,76,0.40) !important;
 }
-
-.btn-sec,
-.btn-filter,
-.btn-logout,
-.btn-del {
-  background: transparent;
-  border: 1px solid var(--border-soft);
-  color: var(--text-main);
-  border-radius: 8px;
-  transition: border-color 0.2s, background 0.2s;
-}
-.btn-sec:hover,
-.btn-filter:hover {
-  border-color: var(--gold);
-  background: rgba(201,164,76,0.08);
-}
-
-.btn-gold,
 .btn-s {
-  background: linear-gradient(135deg, #c9a44c, #a8832f);
-  color: #111;
-  border: none;
-  border-radius: 8px;
-  transition: filter 0.2s;
+  background: linear-gradient(135deg, #d4b055 0%, #a8832f 100%) !important;
+  color: #0e0a00 !important; border: none !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 10px rgba(201,164,76,0.2) !important;
+  transition: filter 0.2s, transform 0.2s !important;
 }
-.btn-gold:hover,
-.btn-s:hover {
-  filter: brightness(1.1);
-  transform: none;
+.btn-s:hover { filter: brightness(1.12) !important; transform: translateY(-1px) !important; }
+.btn-sec {
+  background: transparent !important;
+  border: 1px solid rgba(201,164,76,0.22) !important;
+  color: #9a9a9a !important; border-radius: 10px !important;
+  transition: all 0.2s !important;
+}
+.btn-sec:hover { border-color: #c9a44c !important; background: rgba(201,164,76,0.08) !important; color: #e8c96a !important; }
+.btn-logout {
+  background: transparent !important; border: 1px solid rgba(201,164,76,0.18) !important;
+  color: #888 !important; border-radius: 10px !important; transition: all 0.2s !important;
+}
+.btn-logout:hover { background: rgba(201,164,76,0.07) !important; color: #e8c96a !important; }
+.btn-filter {
+  background: transparent !important; border: 1px solid rgba(201,164,76,0.20) !important;
+  color: #c9a44c !important; border-radius: 10px !important; transition: all 0.2s !important;
+}
+.btn-filter:hover { background: rgba(201,164,76,0.10) !important; border-color: #c9a44c !important; }
+.btn-del {
+  background: transparent !important; border: 1px solid rgba(255,92,92,0.22) !important;
+  color: #ff5c5c !important; border-radius: 8px !important; transition: all 0.2s !important;
+}
+.btn-del:hover { background: rgba(255,92,92,0.10) !important; }
+
+/* ---- TABLE — zebra, hover, colored values ---- */
+table { border-collapse: separate !important; border-spacing: 0 !important; }
+th {
+  background: rgba(0,0,0,0.28) !important;
+  border-bottom: 1px solid rgba(201,164,76,0.18) !important;
+  font-size: 9px !important;
+  letter-spacing: 2px !important;
+  color: #c9a44c !important;
+  padding: 10px 12px !important;
+}
+td {
+  border-bottom: 1px solid rgba(255,255,255,0.035) !important;
+  padding: 10px 12px !important;
+  transition: background 0.15s !important;
+}
+tbody tr:nth-child(even) td { background: rgba(255,255,255,0.012) !important; }
+tbody tr:hover td { background: rgba(201,164,76,0.06) !important; }
+
+/* ---- COLOR TOKENS ---- */
+.pos { color: #3dd68c !important; font-weight: 600 !important; text-shadow: 0 0 8px rgba(61,214,140,0.3) !important; }
+.neg { color: #ff5c5c !important; font-weight: 500 !important; text-shadow: 0 0 8px rgba(255,92,92,0.2) !important; }
+.gld { color: #e8c96a !important; }
+
+/* ---- INSIGHTS ---- */
+.ins-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.030) 0%, rgba(255,255,255,0.012) 100%) !important;
+  border: 1px solid rgba(201,164,76,0.14) !important;
+  border-radius: 12px !important;
+  transition: border-color 0.2s, transform 0.2s !important;
+}
+.ins-card:hover { border-color: rgba(201,164,76,0.30) !important; transform: translateY(-2px) !important; }
+
+/* ---- CHART WRAP ---- */
+.chart-wrap {
+  background: rgba(255,255,255,0.018) !important;
+  border: 1px solid rgba(201,164,76,0.12) !important;
+  border-radius: 14px !important;
+  padding: 18px !important;
 }
 
-tr:hover td { background: rgba(255,255,255,0.02); }
-td { border-bottom: 1px solid rgba(255,255,255,0.03); }
+/* ---- TOAST ---- */
+.toast {
+  background: rgba(14,14,16,0.96) !important;
+  border: 1px solid rgba(201,164,76,0.28) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,164,76,0.06) !important;
+  backdrop-filter: blur(12px) !important;
+}
 
-.pos { color: #4cd964; font-weight: 500; }
-.neg { color: #ff5c5c; }
+/* ---- PARSE PREVIEW ---- */
+.pprev {
+  background: rgba(61,214,140,0.05) !important;
+  border: 1px solid rgba(61,214,140,0.28) !important;
+  border-radius: 12px !important;
+}
+.cprev {
+  border: 1px solid rgba(201,164,76,0.14) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
 
-.ins-card,
-.insight-card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border-soft);
-  border-radius: 10px;
+/* ---- ADMIN / MISC ---- */
+.admin-note {
+  background: rgba(255,255,255,0.020) !important;
+  border: 1px solid rgba(201,164,76,0.16) !important;
+  border-radius: 14px !important;
+}
+.celeb-msg {
+  background: linear-gradient(160deg, #1a1a1d, #111113) !important;
+  border: 1px solid rgba(201,164,76,0.45) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 0 60px rgba(201,164,76,0.25) !important;
+}
+.bottomnav {
+  background: rgba(8,8,9,0.96) !important;
+  border-top: 1px solid rgba(201,164,76,0.12) !important;
+  backdrop-filter: blur(16px) !important;
+}
+.bnav.on { color: #e8c96a !important; border-top-color: #c9a44c !important; }
+.filter-row { border-bottom: 1px solid rgba(201,164,76,0.10) !important; }
+.fi-sm { background: rgba(255,255,255,0.040) !important; border: 1px solid rgba(201,164,76,0.15) !important; border-radius: 10px !important; }
+.reset-badge { border-radius: 20px !important; }
+.reset-badge.on { background: rgba(61,214,140,0.08) !important; border-color: rgba(61,214,140,0.40) !important; color: #3dd68c !important; }
+.tabs { border-bottom: 1px solid rgba(201,164,76,0.12) !important; }
+.tab.on { text-shadow: 0 0 12px rgba(201,164,76,0.4) !important; }
+/* ---- DUST PARTICLES ---- */
+.dust-particle {
+  position: fixed;
+  width: 2px; height: 2px;
+  background: rgba(201,164,76,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: dust-float linear infinite;
+}
+@keyframes dust-float {
+  0%   { transform: translateY(100vh) translateX(0px) scale(0); opacity: 0; }
+  10%  { opacity: 1; transform: translateY(85vh) translateX(8px) scale(1); }
+  50%  { opacity: 0.6; transform: translateY(40vh) translateX(-12px) scale(0.8); }
+  90%  { opacity: 0.2; transform: translateY(5vh) translateX(6px) scale(0.4); }
+  100% { transform: translateY(-5vh) translateX(0px) scale(0); opacity: 0; }
+}
+
+/* ---- TOAST UPGRADE ---- */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px);
+  padding: 11px 20px; font-family: 'Cinzel', serif; font-size: 11px;
+  letter-spacing: 1.5px; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  white-space: nowrap; z-index: 999;
+}
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.ok  { border-color: rgba(61,214,140,0.4) !important; color: #3dd68c; }
+.toast.bad { border-color: rgba(255,92,92,0.4) !important; color: #ff5c5c; }
+@media(min-width:640px) { .toast { bottom: 28px; } }
+
+/* ---- SIDEBAR DECORATION ---- */
+.sidebar-footer {
+  margin-top: auto;
   padding: 16px;
   text-align: center;
+  color: rgba(201,164,76,0.2);
+  font-size: 22px;
+  letter-spacing: 8px;
 }
 
-.chart-wrap,
-.chart-container {
-  padding: 20px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border-soft);
-}
+/* ---- PAGE TRANSITION ---- */
+.page { animation: page-in 0.22s ease; }
+@keyframes page-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-.panel { margin-bottom: 24px; }
-.sgrid,
-.igrid { gap: 16px; }
+/* ---- HERO CARD glow pulse ---- */
+.scard-hero .scard-val.pos {
+  animation: profit-pulse 3s ease-in-out infinite;
+}
+@keyframes profit-pulse {
+  0%,100% { text-shadow: 0 0 8px rgba(61,214,140,0.3); }
+  50%      { text-shadow: 0 0 20px rgba(61,214,140,0.6), 0 0 40px rgba(61,214,140,0.2); }
+}
+.sgrid-hero {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
+  margin-bottom: 18px !important;
+}
+@media(min-width:480px) {
+  .sgrid-hero { grid-template-columns: 1fr 1fr 1fr 1fr !important; }
+  .scard-hero { grid-column: span 2 !important; }
+}
 </style>
 </head>
 <body>
@@ -727,38 +1246,180 @@ td { border-bottom: 1px solid rgba(255,255,255,0.03); }
   <div class="celeb-sub">Você dominou a hunt de hoje, aventureiro!</div>
 </div>
 
-<!-- ===== AUTH ===== -->
-<div class="screen on" id="auth">
+<!-- ===== SUBSCRIPTION BLOCKED ===== -->
+<div class="screen" id="paywall">
   <div class="auth-logo">
     <span class="auth-sword">⚔️</span>
     <div class="auth-title">DUTRA ANALYZER</div>
-    <div class="auth-sub">Registre suas hunts. Domine o profit.</div>
+    <div class="auth-sub" id="pw-sub">Escolha seu plano para continuar.</div>
   </div>
   <div class="auth-divider">✦ ✦ ✦</div>
-  <div class="auth-box">
-    <div class="tabs">
-      <div class="tab on" onclick="authTab('in')">Entrar</div>
-      <div class="tab" onclick="authTab('up')">Cadastrar</div>
+  <div style="width:100%;max-width:400px;padding:0 20px;">
+    <div id="pw-expired-msg" style="display:none;background:rgba(221,64,64,0.08);border:1px solid rgba(221,64,64,0.3);border-radius:12px;padding:14px 16px;margin-bottom:18px;text-align:center;">
+      <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:#ff5c5c;margin-bottom:6px;">⛔ ACESSO EXPIRADO</div>
+      <div style="font-size:13px;color:#9a9a9a;">Seu plano venceu. Renove para continuar acessando suas hunts.</div>
     </div>
-    <div id="form-in">
-      <label class="lbl">E-mail</label>
-      <input class="fi" type="email" id="l-email" placeholder="seu@email.com" autocomplete="email">
-      <label class="lbl">Senha</label>
-      <input class="fi" type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
-      <button class="btn-gold" onclick="doLogin()">⚡ ENTRAR NO ANALYZER</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+      <div class="pw-plan" id="pw-mensal" onclick="selectPlan('mensal')">
+        <div class="pw-plan-name">Mensal</div>
+        <div class="pw-plan-price">R$ 11,90</div>
+        <div class="pw-plan-period">por mês</div>
+        <div class="pw-plan-desc">Acesso completo por 30 dias</div>
+      </div>
+      <div class="pw-plan pw-plan-dest" id="pw-trimestral" onclick="selectPlan('trimestral')">
+        <div class="pw-plan-badge">ECONOMIZE 16%</div>
+        <div class="pw-plan-name">Trimestral</div>
+        <div class="pw-plan-price">R$ 29,99</div>
+        <div class="pw-plan-period">por 3 meses</div>
+        <div class="pw-plan-desc">Acesso completo por 90 dias</div>
+      </div>
     </div>
-    <div id="form-up" style="display:none">
-      <label class="lbl">Personagem</label>
-      <input class="fi" type="text" id="r-name" placeholder="Nome do seu char" autocomplete="nickname">
-      <label class="lbl">E-mail</label>
-      <input class="fi" type="email" id="r-email" placeholder="seu@email.com" autocomplete="email">
-      <label class="lbl">Senha</label>
-      <input class="fi" type="password" id="r-pass" placeholder="mínimo 6 caracteres" autocomplete="new-password">
-      <label class="lbl">Meta Diária (gold)</label>
-      <input class="fi" type="number" id="r-meta" value="500000" min="0">
-      <button class="btn-gold" onclick="doRegister()">🏰 Criar Personagem</button>
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(201,164,76,0.15);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:#c9a44c;margin-bottom:10px;">📋 INSTRUÇÕES DE PAGAMENTO</div>
+      <div style="font-size:13px;color:#9a9a9a;line-height:1.8;">
+        1. Escolha seu plano acima<br>
+        2. Realize o pagamento via PIX<br>
+        3. Envie o comprovante para o WhatsApp/e-mail do suporte<br>
+        4. Aguarde a liberação (em até 1h)
+      </div>
+      <div id="pw-pix" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(201,164,76,0.1);">
+        <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:#c9a44c;margin-bottom:6px;">CHAVE PIX</div>
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(201,164,76,0.2);border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span id="pw-pix-key" style="font-family:monospace;font-size:13px;color:#eaeaea;word-break:break-all;"></span>
+          <button onclick="copyPix()" style="background:rgba(201,164,76,0.1);border:1px solid rgba(201,164,76,0.3);color:#c9a44c;border-radius:6px;padding:4px 10px;font-family:'Cinzel',serif;font-size:8px;white-space:nowrap;flex-shrink:0;">COPIAR</button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#9a9a9a;">Valor: <span id="pw-valor" style="color:#e8c96a;font-family:'Cinzel',serif;"></span></div>
+      </div>
     </div>
-    <div class="auth-err" id="auth-err"></div>
+    <button class="btn-gold" style="width:100%;font-size:11px;padding:13px;" onclick="doLogout()">← Sair da conta</button>
+  </div>
+</div>
+
+<!-- ===== AUTH ===== -->
+<div class="screen on" id="auth">
+  <div class="auth-frame">
+
+    <!-- RED BANNER -->
+    <div class="auth-banner">
+      <div class="auth-banner-inner">
+        <div class="auth-banner-ribbon">
+          <span class="auth-banner-title">DUTRA ANALYZER</span>
+        </div>
+        <div class="auth-banner-curl-l"></div>
+        <div class="auth-banner-curl-r"></div>
+      </div>
+    </div>
+
+    <!-- STONE BOX -->
+    <div class="auth-box">
+      <!-- Gold corner ornaments -->
+      <div class="auth-box-corners">
+        <!-- TL -->
+        <div class="corner corner-tl">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="34" height="34" rx="1" stroke="#3a2c10" stroke-width="1"/>
+            <circle cx="18" cy="18" r="7" fill="url(#g1)" stroke="#6a4c10" stroke-width="1"/>
+            <circle cx="18" cy="18" r="4" fill="url(#g2)"/>
+            <defs>
+              <radialGradient id="g1" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#f5d060"/>
+                <stop offset="50%" stop-color="#c8991a"/>
+                <stop offset="100%" stop-color="#6a4808"/>
+              </radialGradient>
+              <radialGradient id="g2" cx="30%" cy="25%" r="70%">
+                <stop offset="0%" stop-color="#fff8d0" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#c8991a" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="corner corner-tr">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="34" height="34" rx="1" stroke="#3a2c10" stroke-width="1"/>
+            <circle cx="18" cy="18" r="7" fill="url(#g3)" stroke="#6a4c10" stroke-width="1"/>
+            <circle cx="18" cy="18" r="4" fill="url(#g4)"/>
+            <defs>
+              <radialGradient id="g3" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#f5d060"/>
+                <stop offset="50%" stop-color="#c8991a"/>
+                <stop offset="100%" stop-color="#6a4808"/>
+              </radialGradient>
+              <radialGradient id="g4" cx="30%" cy="25%" r="70%">
+                <stop offset="0%" stop-color="#fff8d0" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#c8991a" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="corner corner-bl">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="34" height="34" rx="1" stroke="#3a2c10" stroke-width="1"/>
+            <circle cx="18" cy="18" r="7" fill="url(#g5)" stroke="#6a4c10" stroke-width="1"/>
+            <circle cx="18" cy="18" r="4" fill="url(#g6)"/>
+            <defs>
+              <radialGradient id="g5" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#f5d060"/>
+                <stop offset="50%" stop-color="#c8991a"/>
+                <stop offset="100%" stop-color="#6a4808"/>
+              </radialGradient>
+              <radialGradient id="g6" cx="30%" cy="25%" r="70%">
+                <stop offset="0%" stop-color="#fff8d0" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#c8991a" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="corner corner-br">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="34" height="34" rx="1" stroke="#3a2c10" stroke-width="1"/>
+            <circle cx="18" cy="18" r="7" fill="url(#g7)" stroke="#6a4c10" stroke-width="1"/>
+            <circle cx="18" cy="18" r="4" fill="url(#g8)"/>
+            <defs>
+              <radialGradient id="g7" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#f5d060"/>
+                <stop offset="50%" stop-color="#c8991a"/>
+                <stop offset="100%" stop-color="#6a4808"/>
+              </radialGradient>
+              <radialGradient id="g8" cx="30%" cy="25%" r="70%">
+                <stop offset="0%" stop-color="#fff8d0" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#c8991a" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <div class="tab on" onclick="authTab('in')">⚔ Entrar</div>
+        <div class="tab" onclick="authTab('up')">🏰 Cadastrar</div>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="form-in">
+        <label class="lbl">E-mail</label>
+        <input class="fi" type="email" id="l-email" placeholder="seu@email.com" autocomplete="email">
+        <label class="lbl">Senha</label>
+        <input class="fi" type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
+        <button class="btn-gold" onclick="doLogin()">ENTRAR</button>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="form-up" style="display:none">
+        <label class="lbl">Personagem</label>
+        <input class="fi" type="text" id="r-name" placeholder="Nome do seu char" autocomplete="nickname">
+        <label class="lbl">E-mail</label>
+        <input class="fi" type="email" id="r-email" placeholder="seu@email.com" autocomplete="email">
+        <label class="lbl">Senha</label>
+        <input class="fi" type="password" id="r-pass" placeholder="mínimo 6 caracteres" autocomplete="new-password">
+        <label class="lbl">Meta Diária (gold)</label>
+        <input class="fi" type="number" id="r-meta" value="500000" min="0">
+        <button class="btn-gold" onclick="doRegister()">CRIAR PERSONAGEM</button>
+      </div>
+
+      <div class="auth-err" id="auth-err"></div>
+      <div class="auth-sub-line">Registre suas hunts. Domine o profit.</div>
+    </div>
   </div>
 </div>
 
@@ -775,12 +1436,18 @@ td { border-bottom: 1px solid rgba(255,255,255,0.03); }
     </div>
   </div>
 
+  <!-- AVISO DE EXPIRAÇÃO -->
+  <div id="expiry-banner" style="display:none;background:rgba(201,164,76,0.1);border-bottom:1px solid rgba(201,164,76,0.3);padding:10px 20px;text-align:center;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:#e8c96a;z-index:50;flex-shrink:0;">
+    ⚠️ <span id="expiry-banner-msg"></span> — <span onclick="doLogout()" style="cursor:pointer;text-decoration:underline;color:#c9a44c;">Renovar agora</span>
+  </div>
+
   <div class="app-body">
     <div class="sidebar">
-      <div class="snav on" data-p="dash" onclick="nav('dash',this)"><span class="snav-icon">📊</span><span class="snav-label">Dashboard</span></div>
-      <div class="snav" data-p="hunt" onclick="nav('hunt',this)"><span class="snav-icon">➕</span><span class="snav-label">Nova Hunt</span></div>
+      <div class="snav on" data-p="dash" onclick="nav('dash',this)"><span class="snav-icon">🗺️</span><span class="snav-label">Dashboard</span></div>
+      <div class="snav" data-p="hunt" onclick="nav('hunt',this)"><span class="snav-icon">⚔️</span><span class="snav-label">Nova Hunt</span></div>
       <div class="snav" data-p="hist" onclick="nav('hist',this)"><span class="snav-icon">📜</span><span class="snav-label">Histórico</span></div>
-      <div class="snav" data-p="cfg" onclick="nav('cfg',this)"><span class="snav-icon">⚙️</span><span class="snav-label">Config</span></div>
+      <div class="snav" data-p="cfg" onclick="nav('cfg',this)"><span class="snav-icon">🔧</span><span class="snav-label">Config</span></div>
+      <div class="sidebar-footer">⚔ ✦ ⚔</div>
     </div>
 
     <div class="content-wrap">
@@ -791,10 +1458,10 @@ td { border-bottom: 1px solid rgba(255,255,255,0.03); }
 
         <div class="panel">
           <div class="ptitle">Hoje — <span id="d-date" style="color:var(--parch2);font-size:10px;"></span></div>
-          <div class="sgrid">
+          <div class="sgrid-hero">
+            <div class="scard scard-hero"><div class="scard-lbl">⚔️ PROFIT DO DIA</div><div class="scard-val" id="d-prof">0</div><div class="scard-sub" id="d-profh">0/h</div></div>
             <div class="scard"><div class="scard-lbl">Loot Total</div><div class="scard-val gld" id="d-loot">0</div><div class="scard-sub">gold coins</div></div>
             <div class="scard"><div class="scard-lbl">Supplies</div><div class="scard-val wht" id="d-sup">0</div><div class="scard-sub">gold coins</div></div>
-            <div class="scard"><div class="scard-lbl">Profit</div><div class="scard-val" id="d-prof">0</div><div class="scard-sub" id="d-profh">0/h</div></div>
             <div class="scard"><div class="scard-lbl">Sessões</div><div class="scard-val gld" id="d-cnt">0</div><div class="scard-sub">hunts</div></div>
           </div>
 
@@ -962,10 +1629,10 @@ Balance: 233,250"></textarea>
   </div><!-- /app-body -->
 
   <div class="bottomnav">
-    <div class="bnav on" data-p="dash" onclick="nav('dash',this)"><div class="bnav-icon">📊</div><div class="bnav-lbl">Dashboard</div></div>
-    <div class="bnav" data-p="hunt" onclick="nav('hunt',this)"><div class="bnav-icon">➕</div><div class="bnav-lbl">Hunt</div></div>
+    <div class="bnav on" data-p="dash" onclick="nav('dash',this)"><div class="bnav-icon">🗺️</div><div class="bnav-lbl">Dashboard</div></div>
+    <div class="bnav" data-p="hunt" onclick="nav('hunt',this)"><div class="bnav-icon">⚔️</div><div class="bnav-lbl">Hunt</div></div>
     <div class="bnav" data-p="hist" onclick="nav('hist',this)"><div class="bnav-icon">📜</div><div class="bnav-lbl">Histórico</div></div>
-    <div class="bnav" data-p="cfg" onclick="nav('cfg',this)"><div class="bnav-icon">⚙️</div><div class="bnav-lbl">Config</div></div>
+    <div class="bnav" data-p="cfg" onclick="nav('cfg',this)"><div class="bnav-icon">🔧</div><div class="bnav-lbl">Config</div></div>
   </div>
 </div>
 
@@ -1056,9 +1723,96 @@ async function saveUserDataFb() {
   try { await setDoc(doc(db,'users',user.uid), window.userData, {merge:true}); } catch(e) {}
 }
 
+// ===== SUBSCRIPTION =====
+const PIX_KEY = 'SEU_EMAIL_OU_CHAVE_PIX_AQUI'; // ← troque pela sua chave PIX
+
+function showPaywall(expired = false) {
+  $('auth').classList.remove('on');
+  $('app').classList.remove('on');
+  $('paywall').classList.add('on');
+  $('pw-expired-msg').style.display = expired ? 'block' : 'none';
+  $('pw-sub').textContent = expired
+    ? 'Seu acesso expirou. Renove para voltar a caçar.'
+    : 'Escolha um plano para começar a registrar suas hunts.';
+}
+
+function showPaywallScreen() {
+  $('auth').classList.remove('on');
+  $('app').classList.remove('on');
+  $('paywall').classList.add('on');
+}
+
+function selectPlan(plano) {
+  document.querySelectorAll('.pw-plan').forEach(p => p.classList.remove('selected'));
+  $('pw-'+plano).classList.add('selected');
+  const valor = plano === 'mensal' ? 'R$ 11,90' : 'R$ 29,99';
+  $('pw-pix').style.display = 'block';
+  $('pw-pix-key').textContent = PIX_KEY;
+  $('pw-valor').textContent = valor;
+}
+
+function copyPix() {
+  navigator.clipboard.writeText(PIX_KEY).then(() => toast('Chave PIX copiada!', 'ok'));
+}
+
+async function checkSubscription(user) {
+  const {db, doc, getDoc} = window._fb;
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists()) return 'no_plan';
+    const data = snap.data();
+
+    // Admin bypass
+    if (data.isAdmin) return 'active';
+
+    const expira = data.planoExpira;
+    if (!expira) return 'no_plan';
+
+    const expiraDate = expira.toDate ? expira.toDate() : new Date(expira);
+    const agora = new Date();
+    const diffMs = expiraDate - agora;
+    const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDias <= 0) return 'expired';
+    if (diffDias <= 3) return `expiring_${diffDias}`;
+    return 'active';
+  } catch(e) {
+    return 'active'; // em caso de erro de leitura, não bloqueia
+  }
+}
+
+function showExpiryBanner(dias) {
+  const banner = $('expiry-banner');
+  const msg = $('expiry-banner-msg');
+  if (dias <= 0) { banner.style.display = 'none'; return; }
+  msg.textContent = dias === 1
+    ? 'Seu plano vence HOJE!'
+    : `Seu plano vence em ${dias} dia${dias > 1 ? 's' : ''}`;
+  banner.style.display = 'block';
+  if (dias === 1) banner.style.background = 'rgba(221,64,64,0.12)';
+}
+
 // ===== APP INIT =====
 async function showApp(user) {
+  const status = await checkSubscription(user);
+
+  if (status === 'expired') {
+    showPaywall(true);
+    return;
+  }
+  if (status === 'no_plan') {
+    showPaywall(false);
+    return;
+  }
+
+  // Aviso de expiração próxima
+  if (status.startsWith('expiring_')) {
+    const dias = parseInt(status.split('_')[1]);
+    showExpiryBanner(dias);
+  }
+
   $('auth').classList.remove('on');
+  $('paywall').classList.remove('on');
   $('app').classList.add('on');
   $('t-user').textContent = user.displayName || user.email;
   $('s-user').textContent = user.displayName || user.email;
@@ -1069,6 +1823,7 @@ async function showApp(user) {
 
 function showAuth() {
   $('app').classList.remove('on');
+  $('paywall').classList.remove('on');
   $('auth').classList.add('on');
 }
 
@@ -1120,10 +1875,22 @@ function refreshDash() {
 
   const fill = $('meta-fill');
   fill.style.width = pctDisp+'%';
-  if (pct >= 100) fill.style.background = 'linear-gradient(90deg,#C8991A,#F5D060,#C8991A)';
-  else if (pct >= 60) fill.style.background = 'linear-gradient(90deg,#2A6A2A,#50CC50)';
-  else if (pct >= 30) fill.style.background = 'linear-gradient(90deg,#6A5000,#C8991A)';
-  else fill.style.background = 'linear-gradient(90deg,#7A1515,#DD4040)';
+  if (T.p < 0) {
+    fill.style.background = 'linear-gradient(90deg,#7A1515,#DD4040)';
+    fill.style.boxShadow = '0 0 10px rgba(221,64,64,0.5)';
+  } else if (pct >= 100) {
+    fill.style.background = 'linear-gradient(90deg,#3dd68c,#50CC50,#3dd68c)';
+    fill.style.boxShadow = '0 0 16px rgba(61,214,140,0.6)';
+  } else if (pct >= 60) {
+    fill.style.background = 'linear-gradient(90deg,#C8991A,#F5D060)';
+    fill.style.boxShadow = '0 0 12px rgba(201,164,76,0.5)';
+  } else if (pct >= 30) {
+    fill.style.background = 'linear-gradient(90deg,#8B6510,#C8991A)';
+    fill.style.boxShadow = '0 0 8px rgba(200,153,26,0.35)';
+  } else {
+    fill.style.background = 'linear-gradient(90deg,#7A1515,#DD4040)';
+    fill.style.boxShadow = '0 0 8px rgba(221,64,64,0.35)';
+  }
 
   $('meta-nums').textContent = fmt(Math.max(0,T.p))+' / '+fmt(meta);
   $('meta-pct').textContent = pctDisp+'%';
@@ -1184,6 +1951,18 @@ function celebrate() {
 }
 
 // ===== PARSER =====
+function parseHuntTime(timeStr) {
+  if (!timeStr) return 0;
+  timeStr = timeStr.replace(';', ':').trim();
+  const parts = timeStr.split(':').map(Number);
+  if (parts.length === 2) {
+    const [hours, minutes] = parts;
+    if (isNaN(hours) || isNaN(minutes)) return 0;
+    return (hours * 60) + minutes;
+  }
+  return 0;
+}
+
 function parseHA() {
   const text = $('ha-text').value;
   if (!text.trim()) { toast('Cole o texto do Hunt Analyzer!','bad'); return; }
@@ -1193,13 +1972,22 @@ function parseHA() {
   const sup  = pn((text.match(/Supplies:\s*([0-9,.\s]+)/i)||[])[1]);
   const bal  = pn((text.match(/Balance:\s*([0-9,.\s]+)/i)||[])[1]);
 
+  // ✅ Bug fix: parser correto de tempo (HH:MM ou HH;MM)
   let tm = 0;
-  const mFull = text.match(/(\d+)h\s+(\d+)min/i);
-  const mH    = text.match(/(\d+)h(?!\s*\d)/i);
-  const mM    = text.match(/(\d+)\s*min/i);
-  if (mFull) tm = parseInt(mFull[1])*60+parseInt(mFull[2]);
-  else if (mH) tm = parseInt(mH[1])*60;
-  else if (mM) tm = parseInt(mM[1]);
+  const mColon = text.match(/(\d{1,2}[:;]\d{2})(?!\d)/);
+  const mFull  = text.match(/(\d+)h\s+(\d+)min/i);
+  const mH     = text.match(/(\d+)h(?!\s*\d)/i);
+  const mM     = text.match(/(\d+)\s*min/i);
+
+  if (mColon) {
+    tm = parseHuntTime(mColon[1]);
+  } else if (mFull) {
+    tm = parseInt(mFull[1])*60 + parseInt(mFull[2]);
+  } else if (mH) {
+    tm = parseInt(mH[1])*60;
+  } else if (mM) {
+    tm = parseInt(mM[1]);
+  }
 
   if (loot>0) $('i-loot').value = loot;
   if (sup>0)  $('i-sup').value  = sup;
@@ -1519,7 +2307,25 @@ function refreshCfg() {
   }
 }
 
-async function saveMeta() {
+// ===== DUST PARTICLES =====
+(function spawnDust() {
+  const count = 18;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'dust-particle';
+    const size = 1 + Math.random() * 2.5;
+    p.style.cssText = `
+      left: ${Math.random()*100}%;
+      width: ${size}px; height: ${size}px;
+      opacity: ${0.2 + Math.random()*0.5};
+      animation-duration: ${12 + Math.random()*18}s;
+      animation-delay: ${Math.random()*16}s;
+      background: rgba(201,164,76,${0.2+Math.random()*0.35});
+    `;
+    document.body.appendChild(p);
+  }
+})();
+
   const meta = parseInt($('s-meta').value)||500000;
   window.userData.meta = meta;
   await saveUserDataFb();
