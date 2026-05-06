@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Dutra Analyzer — Hunt Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -483,6 +484,76 @@ tr:hover td { background: rgba(200,153,26,0.04); }
 .admin-note a { color: var(--gold-l); text-decoration: none; }
 .admin-note a:hover { text-decoration: underline; }
 
+/* ===== FILTERS ===== */
+.filter-row {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end;
+  margin-bottom: 16px; padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.filter-group { display: flex; flex-direction: column; gap: 4px; }
+.filter-group label {
+  font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 2px;
+  color: var(--gold-d); text-transform: uppercase;
+}
+.fi-sm {
+  background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+  border-radius: var(--r); color: var(--parch);
+  font-family: 'Crimson Text', serif; font-size: 14px;
+  padding: 7px 10px; outline: none; transition: all .2s;
+}
+.fi-sm:focus { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow); }
+.fi-sm option { background: var(--bg3); }
+.btn-filter {
+  background: rgba(200,153,26,0.12); border: 1px solid var(--border2);
+  color: var(--gold); font-family: 'Cinzel', serif; font-size: 9px;
+  letter-spacing: 1.5px; padding: 8px 14px; border-radius: var(--r);
+  cursor: pointer; text-transform: uppercase; transition: all .2s;
+  align-self: flex-end;
+}
+.btn-filter:hover { background: rgba(200,153,26,0.22); border-color: var(--gold-d); }
+.btn-filter.active { background: rgba(200,153,26,0.25); border-color: var(--gold); color: var(--gold-l); }
+
+/* ===== CHART ===== */
+.chart-wrap {
+  position: relative; padding: 4px 0 0;
+  background: rgba(0,0,0,0.25); border-radius: var(--r);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.chart-wrap canvas { display: block; max-height: 200px; }
+.chart-empty {
+  text-align: center; padding: 40px 20px;
+  font-family: 'Crimson Text', serif; font-style: italic;
+  color: var(--parch4); font-size: 15px;
+}
+
+/* ===== INSIGHTS ===== */
+.insights-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+  margin-top: 12px;
+}
+@media(max-width:480px) { .insights-grid { grid-template-columns: 1fr; } }
+.ins-card {
+  background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 12px 10px; text-align: center;
+}
+.ins-icon { font-size: 18px; margin-bottom: 6px; }
+.ins-lbl {
+  font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 1.5px;
+  color: var(--parch3); text-transform: uppercase; margin-bottom: 4px;
+}
+.ins-val {
+  font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700;
+}
+
+/* ===== AUTO-RESET ===== */
+.reset-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.reset-badge {
+  display: inline-block; font-family: 'Cinzel', serif; font-size: 9px;
+  letter-spacing: 1px; padding: 3px 10px; border-radius: 20px;
+  border: 1px solid var(--border2); color: var(--parch3);
+}
+.reset-badge.on { border-color: var(--green); color: var(--green-l); background: var(--green-bg); }
+
 /* ===== CELEBRATION ===== */
 #celebration {
   position: fixed; inset: 0; z-index: 999;
@@ -515,6 +586,135 @@ tr:hover td { background: rgba(200,153,26,0.04); }
 @keyframes spin-once { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
 .celeb-title { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900; color: var(--gold-l); letter-spacing: 3px; margin-bottom: 6px; }
 .celeb-sub { font-family: 'Crimson Text', serif; font-style: italic; color: var(--parch2); font-size: 16px; }
+
+/* =============================
+   OVERRIDE MODERNO
+============================= */
+:root {
+  --gold: #c9a44c;
+  --gold-soft: rgba(201,164,76,0.6);
+  --bg-main: #0f0f10;
+  --bg-card: rgba(255,255,255,0.02);
+  --border-soft: rgba(201,164,76,0.15);
+  --text-main: #eaeaea;
+  --text-soft: #9a9a9a;
+}
+
+body {
+  background: radial-gradient(circle at 20% 20%, #1a1a1a, #0b0b0c);
+  color: var(--text-main);
+}
+
+.sidebar {
+  background: rgba(255,255,255,0.01);
+  border-right: 1px solid var(--border-soft);
+  backdrop-filter: blur(6px);
+}
+
+.panel,
+.auth-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.panel:hover {
+  border-color: rgba(201,164,76,0.35);
+  transform: translateY(-2px);
+}
+
+.sh {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+.ptitle {
+  color: var(--gold);
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.scard-sub,
+.set-hint,
+.auth-sub {
+  color: var(--text-soft);
+}
+
+input.fi,
+textarea.fi,
+.fi-sm,
+.iline {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  color: var(--text-main);
+  transition: border-color 0.2s;
+}
+input.fi:focus,
+textarea.fi:focus,
+.fi-sm:focus,
+.iline:focus {
+  border-color: var(--gold);
+  outline: none;
+  box-shadow: none;
+}
+
+.btn-sec,
+.btn-filter,
+.btn-logout,
+.btn-del {
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-main);
+  border-radius: 8px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.btn-sec:hover,
+.btn-filter:hover {
+  border-color: var(--gold);
+  background: rgba(201,164,76,0.08);
+}
+
+.btn-gold,
+.btn-s {
+  background: linear-gradient(135deg, #c9a44c, #a8832f);
+  color: #111;
+  border: none;
+  border-radius: 8px;
+  transition: filter 0.2s;
+}
+.btn-gold:hover,
+.btn-s:hover {
+  filter: brightness(1.1);
+  transform: none;
+}
+
+tr:hover td { background: rgba(255,255,255,0.02); }
+td { border-bottom: 1px solid rgba(255,255,255,0.03); }
+
+.pos { color: #4cd964; font-weight: 500; }
+.neg { color: #ff5c5c; }
+
+.ins-card,
+.insight-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.chart-wrap,
+.chart-container {
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-soft);
+}
+
+.panel { margin-bottom: 24px; }
+.sgrid,
+.igrid { gap: 16px; }
 </style>
 </head>
 <body>
@@ -674,12 +874,51 @@ Balance: 233,250"></textarea>
       <!-- HISTÓRICO -->
       <div class="page" id="page-hist">
         <div class="sh">📜 Histórico</div>
+
+        <!-- FILTROS -->
         <div class="panel">
+          <div class="ptitle">🔍 Filtros</div>
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>Data</label>
+              <input class="fi-sm" type="date" id="f-date" oninput="applyFilters()">
+            </div>
+            <div class="filter-group">
+              <label>Local</label>
+              <select class="fi-sm" id="f-local" onchange="applyFilters()">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Resultado</label>
+              <select class="fi-sm" id="f-result" onchange="applyFilters()">
+                <option value="">Todos</option>
+                <option value="pos">Positivos</option>
+                <option value="neg">Negativos</option>
+              </select>
+            </div>
+            <button class="btn-filter" onclick="clearFilters()">✕ Limpar</button>
+          </div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <span style="font-size:13px;color:var(--parch3);font-style:italic;" id="h-sum"></span>
             <button class="btn-sec" style="color:var(--red-l);border-color:var(--red);" onclick="clearAll()">🗑 Limpar Tudo</button>
           </div>
           <div class="tbl-wrap" id="h-tbl"></div>
+        </div>
+
+        <!-- INSIGHTS -->
+        <div class="panel" id="panel-insights" style="display:none">
+          <div class="ptitle">💡 Insights</div>
+          <div class="insights-grid" id="insights-grid"></div>
+        </div>
+
+        <!-- GRÁFICO -->
+        <div class="panel">
+          <div class="ptitle">📈 Profit ao Longo do Tempo</div>
+          <div class="chart-wrap">
+            <canvas id="profit-chart"></canvas>
+            <div class="chart-empty" id="chart-empty" style="display:none">Nenhum dado para exibir.</div>
+          </div>
         </div>
       </div>
 
@@ -702,6 +941,20 @@ Balance: 233,250"></textarea>
           <div class="ptitle">👤 Conta</div>
           <div class="set-hint" style="margin-bottom:14px;">Logado como: <span class="gld" id="s-user"></span></div>
           <button class="btn-sec" onclick="doLogout()">🚪 Sair da Conta</button>
+        </div>
+
+        <div class="panel">
+          <div class="ptitle">🔄 Reset Automático</div>
+          <div class="set-hint" style="margin-bottom:12px;">Defina o dia do mês para resetar automaticamente seu histórico de hunts.</div>
+          <div class="reset-row">
+            <input class="iline" type="number" id="s-reset-day" min="1" max="31" placeholder="Ex: 1" style="width:100px;">
+            <button class="btn-s" onclick="saveAutoReset()">Salvar</button>
+            <button class="btn-sec" onclick="clearAutoReset()">✕ Desativar</button>
+          </div>
+          <div class="set-hint">Status: <span class="reset-badge" id="reset-badge">Desativado</span></div>
+          <div style="margin-top:14px;">
+            <button class="btn-sec" style="color:var(--red-l);border-color:var(--red);" onclick="manualReset()">🗑 Reset Manual Agora</button>
+          </div>
         </div>
       </div>
 
@@ -809,6 +1062,7 @@ async function showApp(user) {
   $('app').classList.add('on');
   $('t-user').textContent = user.displayName || user.email;
   $('s-user').textContent = user.displayName || user.email;
+  await checkAutoReset();
   refreshDash();
   refreshCfg();
 }
@@ -1015,17 +1269,51 @@ async function saveHunt() {
 }
 
 // ===== HISTORY =====
+let _chartInstance = null;
+
 function refreshHist() {
   const h = window.huntsCache || [];
-  if (!h.length) {
-    $('h-tbl').innerHTML='<div class="empty"><div class="empty-icon">📜</div><p>Nenhuma hunt registrada ainda.</p></div>';
-    $('h-sum').textContent=''; return;
-  }
+  _buildLocationFilter(h);
+  applyFilters();
+  renderInsights(h);
+  renderChart(h);
+}
+
+function _buildLocationFilter(hunts) {
+  const sel = $('f-local');
+  const current = sel.value;
+  const locs = [...new Set(hunts.map(x => x.local).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Todos</option>' +
+    locs.map(l => `<option value="${l}"${l===current?' selected':''}>${l}</option>`).join('');
+}
+
+function applyFilters() {
+  const h = window.huntsCache || [];
+  const date = $('f-date').value;
+  const local = $('f-local').value;
+  const result = $('f-result').value;
+
+  let filtered = h;
+  if (date)   filtered = filtered.filter(x => x.date === date);
+  if (local)  filtered = filtered.filter(x => x.local === local);
+  if (result === 'pos') filtered = filtered.filter(x => (x.loot - x.sup) >= 0);
+  if (result === 'neg') filtered = filtered.filter(x => (x.loot - x.sup) < 0);
+
+  // summary
   let tl=0,ts=0,tt=0;
-  h.forEach(x=>{tl+=x.loot||0;ts+=x.sup||0;tt+=x.time||0;});
-  $('h-sum').textContent = h.length+' hunts · '+fmt(tl-ts)+' gold total · '+Math.round(tt/60)+'h caçadas';
+  filtered.forEach(x=>{tl+=x.loot||0;ts+=x.sup||0;tt+=x.time||0;});
+  const showing = filtered.length !== h.length ? `${filtered.length} de ${h.length}` : h.length;
+  $('h-sum').textContent = filtered.length
+    ? `${showing} hunts · ${fmt(tl-ts)} gold · ${Math.round(tt/60)}h`
+    : 'Nenhuma hunt encontrada';
+
+  // table
+  if (!filtered.length) {
+    $('h-tbl').innerHTML='<div class="empty"><div class="empty-icon">🔍</div><p>Nenhuma hunt com esses filtros.</p></div>';
+    return;
+  }
   $('h-tbl').innerHTML='<table><thead><tr><th>Data</th><th>Local</th><th>Loot</th><th>Sup</th><th>Profit</th><th>Min</th><th>P/h</th><th></th></tr></thead><tbody>'+
-    h.map(x=>{
+    filtered.map(x=>{
       const p=x.loot-x.sup, ph=x.time>0?Math.round(p/(x.time/60)):0;
       return `<tr>
         <td style="white-space:nowrap">${fmtDate(x.date)}</td>
@@ -1038,6 +1326,118 @@ function refreshHist() {
         <td><button class="btn-del" onclick="delHunt('${x.id}')">✕</button></td>
       </tr>`;
     }).join('')+'</tbody></table>';
+}
+
+function clearFilters() {
+  $('f-date').value = '';
+  $('f-local').value = '';
+  $('f-result').value = '';
+  applyFilters();
+}
+
+function renderInsights(hunts) {
+  const panel = $('panel-insights');
+  const grid = $('insights-grid');
+  if (!hunts || !hunts.length) { panel.style.display='none'; return; }
+  panel.style.display='block';
+
+  const profits = hunts.map(x => x.loot - x.sup);
+  const best = Math.max(...profits);
+  const worst = Math.min(...profits);
+  const avg = profits.reduce((a,b)=>a+b,0) / profits.length;
+  const bestHunt = hunts.find(x => (x.loot - x.sup) === best);
+  const worstHunt = hunts.find(x => (x.loot - x.sup) === worst);
+  const phs = hunts.filter(x=>x.time>0).map(x=>Math.round((x.loot-x.sup)/(x.time/60)));
+  const bestPh = phs.length ? Math.max(...phs) : 0;
+
+  grid.innerHTML = `
+    <div class="ins-card">
+      <div class="ins-icon">🏆</div>
+      <div class="ins-lbl">Melhor Profit</div>
+      <div class="ins-val ${best>=0?'pos':'neg'}">${best>=0?'+':''}${fmt(best)}</div>
+      <div style="font-size:11px;color:var(--parch3);margin-top:3px">${bestHunt?.local||''} ${bestHunt?.date?fmtDate(bestHunt.date):''}</div>
+    </div>
+    <div class="ins-card">
+      <div class="ins-icon">📉</div>
+      <div class="ins-lbl">Pior Profit</div>
+      <div class="ins-val ${worst>=0?'pos':'neg'}">${worst>=0?'+':''}${fmt(worst)}</div>
+      <div style="font-size:11px;color:var(--parch3);margin-top:3px">${worstHunt?.local||''} ${worstHunt?.date?fmtDate(worstHunt.date):''}</div>
+    </div>
+    <div class="ins-card">
+      <div class="ins-icon">📊</div>
+      <div class="ins-lbl">Média / Hunt</div>
+      <div class="ins-val ${avg>=0?'pos':'neg'}">${avg>=0?'+':''}${fmt(avg)}</div>
+      <div style="font-size:11px;color:var(--parch3);margin-top:3px">em ${hunts.length} hunts</div>
+    </div>
+  `;
+}
+
+function renderChart(hunts) {
+  const canvas = $('profit-chart');
+  const empty = $('chart-empty');
+  if (!hunts || !hunts.length) {
+    canvas.style.display='none'; empty.style.display='block'; return;
+  }
+  canvas.style.display='block'; empty.style.display='none';
+
+  // group by date, sum profit
+  const byDate = {};
+  [...hunts].sort((a,b)=>a.date>b.date?1:-1).forEach(x => {
+    const p = x.loot - x.sup;
+    byDate[x.date] = (byDate[x.date]||0) + p;
+  });
+  const labels = Object.keys(byDate).map(d => fmtDate(d));
+  const data = Object.values(byDate);
+  const colors = data.map(v => v >= 0 ? 'rgba(96,221,96,0.85)' : 'rgba(221,64,64,0.85)');
+
+  if (_chartInstance) { _chartInstance.destroy(); _chartInstance = null; }
+
+  _chartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Profit',
+        data,
+        backgroundColor: colors,
+        borderColor: colors.map(c=>c.replace('0.85','1')),
+        borderWidth: 1,
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => (ctx.raw>=0?'+':'')+fmt(ctx.raw)+' gp'
+          },
+          backgroundColor: '#1F1400',
+          borderColor: '#4A3008',
+          borderWidth: 1,
+          titleColor: '#C8991A',
+          bodyColor: '#ECD9A0',
+          titleFont: { family: 'Cinzel', size: 11 },
+          bodyFont: { family: 'Crimson Text', size: 13 }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#8A6830', font: { family: 'Cinzel', size: 9 }, maxRotation: 45 },
+          grid: { color: 'rgba(74,48,8,0.3)' }
+        },
+        y: {
+          ticks: {
+            color: '#8A6830', font: { family: 'Cinzel', size: 9 },
+            callback: v => fmt(v)
+          },
+          grid: { color: 'rgba(74,48,8,0.3)' }
+        }
+      }
+    }
+  });
 }
 
 async function delHunt(id) {
@@ -1059,11 +1459,64 @@ async function clearAll() {
   } catch(e) { toast('Erro: '+e.message,'bad'); }
 }
 
+// ===== AUTO-RESET =====
+async function saveAutoReset() {
+  const day = parseInt($('s-reset-day').value);
+  if (!day || day < 1 || day > 31) { toast('Informe um dia entre 1 e 31!','bad'); return; }
+  window.userData.autoResetDay = day;
+  await saveUserDataFb();
+  refreshCfg();
+  toast('Reset automático configurado para dia '+day,'ok');
+}
+
+async function clearAutoReset() {
+  window.userData.autoResetDay = null;
+  await saveUserDataFb();
+  refreshCfg();
+  toast('Reset automático desativado.','');
+}
+
+async function manualReset() {
+  if (!confirm('Resetar TODAS as hunts agora? Isso não tem volta.')) return;
+  const user=window.currentUser; if (!user) return;
+  const {db,doc,deleteDoc} = window._fb;
+  try {
+    await Promise.all((window.huntsCache||[]).map(h=>deleteDoc(doc(db,'hunts',h.id))));
+    toast('✓ Reset concluído.','ok');
+  } catch(e) { toast('Erro: '+e.message,'bad'); }
+}
+
+async function checkAutoReset() {
+  const day = window.userData.autoResetDay;
+  if (!day) return;
+  const today = new Date().getDate();
+  const lastReset = window.userData.lastResetDate;
+  const todayStr = new Date().toISOString().split('T')[0];
+  if (today === day && lastReset !== todayStr) {
+    window.userData.lastResetDate = todayStr;
+    await saveUserDataFb();
+    await manualReset();
+    toast('♻️ Reset automático executado!','ok');
+  }
+}
+
 // ===== CONFIG =====
 function refreshCfg() {
   $('s-meta').value = window.userData.meta || 500000;
   $('s-meta-cur').textContent = fmt(window.userData.meta||500000)+' gold/dia';
   $('s-user').textContent = window.currentUser?.displayName || window.currentUser?.email || '—';
+
+  const day = window.userData.autoResetDay;
+  const badge = $('reset-badge');
+  if (day) {
+    badge.textContent = 'Ativo — dia '+day+' de cada mês';
+    badge.className = 'reset-badge on';
+    $('s-reset-day').value = day;
+  } else {
+    badge.textContent = 'Desativado';
+    badge.className = 'reset-badge';
+    $('s-reset-day').value = '';
+  }
 }
 
 async function saveMeta() {
